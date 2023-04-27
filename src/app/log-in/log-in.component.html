@@ -1,0 +1,38 @@
+<div class="vh-100 d-flex align-items-center">
+  <div class="card mx-auto my-auto" style="width: 30%">
+    <div class="form-group mt-3 mx-3">
+      <label for="usr">Correo:</label>
+      <input [(ngModel)]="email" type="text" class="form-control" id="email" />
+    </div>
+    <div class="form-group mt-3 mx-3">
+      <label for="pwd">Contraseña:</label>
+      <input [(ngModel)]="password" type="password" class="form-control" id="password" />
+    </div>
+    <button
+      type="button"
+      class="btn btn-primary mx-auto mt-3 mb-3"
+      style="width: 30%"
+      (click)="login()"
+    >
+      Iniciar Sesion
+    </button>
+    <p class="mx-auto">Aun no estas registrado?</p>
+
+    <button
+      type="button"
+      class="btn btn-success mx-auto mt-1 mb-1"
+      style="width: 60%"
+      (click)="registerStudent()"
+    >
+      Registrarse como Alumno
+    </button>
+    <button
+      type="button"
+      class="btn btn-success mx-auto mt-1 mb-3"
+      style="width: 60%"
+      (click)="registerTeacher()"
+    >
+      Registrarse como Docente
+    </button>
+  </div>
+</div>
