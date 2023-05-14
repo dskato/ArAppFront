@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { TokenService } from 'src/services/token.service';
+import { ApiHandlerService } from 'src/services/api-handler.service';
 
 export interface LoginResponse {
   code: number;
@@ -26,7 +27,7 @@ export interface LoginResponse {
 export class LogInComponent implements OnInit {
 
   
-  globalUrl = 'https://localhost:7016';
+  globalUrl = this.apiHandler.apiUrl;
   email!: string;
   password!: string;
 
@@ -34,7 +35,8 @@ export class LogInComponent implements OnInit {
     private router: Router,
     private http: HttpClient,
     private toastr: ToastrService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private apiHandler: ApiHandlerService
   ) {}
 
   ngOnInit(): void {

@@ -1,0 +1,17 @@
+.mat-elevation-z8 {
+  width: 100%;
+  justify-content: center;
+}
+
+.form-control {
+  margin-top: 12px;
+}
+.bi {
+  margin-top: 21px;
+  margin-left: 21px;
+  font-size: 21px;
+}
+
+.label-table {
+  margin-top: 12px;
+}

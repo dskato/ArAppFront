@@ -3,6 +3,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { TokenService } from 'src/services/token.service';
+import { ApiHandlerService } from 'src/services/api-handler.service';
+
 
 @Component({
   selector: 'app-register',
@@ -10,7 +12,7 @@ import { TokenService } from 'src/services/token.service';
   styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent implements OnInit {
-  globalUrl = 'https://localhost:7016';
+  globalUrl = this.apiHandler.apiUrl;
   name!: string;
   lastname!: string;
   email!: string;
@@ -22,7 +24,8 @@ export class RegisterComponent implements OnInit {
     private http: HttpClient,
     private toastr: ToastrService,
     private router: Router,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private apiHandler: ApiHandlerService
   ) {}
 
   ngOnInit() {
