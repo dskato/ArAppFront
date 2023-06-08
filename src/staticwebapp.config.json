@@ -1,8 +1,9 @@
 {
-    "navigationFallback": {
-        "rewrite": "index.html"
-    },
-    "mimeTypes": {
-        ".json": "text/json"
-    }
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  },
+  "mimeTypes": {
+    ".json": "text/json"
+  }
 }
+
