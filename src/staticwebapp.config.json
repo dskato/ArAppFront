@@ -1,6 +1,8 @@
 {
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/*.{ico,js,map,css}"]
-  }
+    "navigationFallback": {
+        "rewrite": "index.html"
+    },
+    "mimeTypes": {
+        ".json": "text/json"
+    }
 }
