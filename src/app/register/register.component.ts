@@ -5,7 +5,6 @@ import { ToastrService } from 'ngx-toastr';
 import { TokenService } from 'src/services/token.service';
 import { ApiHandlerService } from 'src/services/api-handler.service';
 
-
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -18,6 +17,8 @@ export class RegisterComponent implements OnInit {
   email!: string;
   password!: string;
   role!: string;
+  age!: number;
+  dateOfBirth!: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,14 +41,17 @@ export class RegisterComponent implements OnInit {
     lastname: string,
     email: string,
     password: string,
-    role: string
+    role: string,
+    age: string
   ) {
     const formData = new FormData();
     formData.append('Firstname', firstname);
     formData.append('Lastname', lastname);
     formData.append('Email', email);
     formData.append('Password', password);
+    formData.append('Age', age);
     formData.append('Role', role);
+    
     return this.http.post(this.globalUrl + '/post-createuser', formData);
   }
 
@@ -63,12 +67,15 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
+    this.calculateAge();
+
     this.createUser(
       this.name,
       this.lastname,
       this.email,
       this.password,
-      this.role
+      this.role,
+      this.age.toString()
     ).subscribe(
       (response) => {
         this.toastr.success('User created successfully.');
@@ -76,10 +83,24 @@ export class RegisterComponent implements OnInit {
       },
       (error) => {
         this.toastr.error('Failed to create user.');
-        console.log("ERROR -> "+ error);
+        console.log('ERROR -> ' + error);
       }
     );
   }
 
- 
+  calculateAge(): void {
+    const today = new Date();
+    const birthDate = new Date(this.dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    this.age = age;
+  }
 }

@@ -20,6 +20,8 @@ export interface UserData {
   role: string;
   token: string | null;
   createDate: string;
+  status:string;
+  editMode:boolean;
 }
 
 @Component({
@@ -44,8 +46,11 @@ export class UserManagementComponent implements OnInit {
     this.http.get<UserListResponse>(this.globalUrl+'/get-getallusers')
       .subscribe(
         (response: UserListResponse) => {
-          this.users = response.data;
-          console.log(this.users); // Do something with the user data
+          this.users = response.data.map((user: UserData) => ({
+            ...user,
+            editMode: false // Add the "editMode" property with a default value of false
+          }));
+          console.log(this.users); 
         },
         (error) => {
           console.error('Error fetching users:', error);
@@ -53,6 +58,19 @@ export class UserManagementComponent implements OnInit {
       );
   }
   
+  getBackgroundColor(status: string): string {
+    if (status === 'Active') {
+      return 'rgba(2, 180, 2, 0.418)';
+    } else if (status === 'Inactive') {
+      return 'rgba(180, 2, 2, 0.418)';
+    } else {
+      return '';
+    }
+  }
+
+  toggleEditMode(user: any): void {
+    user.editMode = !user.editMode; 
+  }
 
 }
 
