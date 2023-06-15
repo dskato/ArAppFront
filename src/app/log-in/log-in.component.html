@@ -1,11 +1,11 @@
 <div class="vh-100 d-flex align-items-center">
   <div class="card mx-auto my-auto" style="width: 30%">
     <div class="form-group mt-3 mx-3">
-      <label for="usr">Correo:</label>
+      <label class="lbl-form" for="usr">Correo:</label>
       <input [(ngModel)]="email" type="text" class="form-control" id="email" />
     </div>
     <div class="form-group mt-3 mx-3">
-      <label for="pwd">Contraseña:</label>
+      <label class="lbl-form" for="pwd">Contraseña:</label>
       <input
         [(ngModel)]="password"
         type="password"
@@ -16,12 +16,12 @@
     <button
       type="button"
       class="btn btn-primary mx-auto mt-3 mb-3"
-      style="width: 30%"
+      style="width: 60%"
       (click)="login()"
     >
       Iniciar Sesion
     </button>
-    <p class="mx-auto">Aun no estas registrado?</p>
+    <p class="lbl-form mx-auto">Aun no estas registrado?</p>
 
     <button
       type="button"
@@ -39,8 +39,8 @@
     >
       Registrarse como Docente
     </button>
-    <a href="#" class="mx-auto">
-      <p style="text-decoration: underline;">Recuperar contraseña</p>
+    <a  class="lbl-form mx-auto">
+      <p (click)="restorePassword()" style="text-decoration: underline;">Recuperar contraseña</p>
     </a>
   </div>
 </div>

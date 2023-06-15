@@ -1,25 +1,25 @@
 <div class="vh-100 d-flex align-items-center">
   <div class="card mx-auto my-auto" style="width: 30%">
     <div class="form-group mt-3 mx-3">
-      <label for="name">Nombre:</label>
+      <label class="label-form" for="name">Nombre:</label>
       <input [(ngModel)]="name" type="text" class="form-control" id="name" required/>
     </div>
     <div class="form-group mt-3 mx-3">
-      <label for="pwd">Apellido:</label>
+      <label class="label-form" for="pwd">Apellido:</label>
       <input [(ngModel)]="lastname" type="text" class="form-control" id="lastname" required/>
     </div>
     <div class="form-group mt-3 mx-3">
-      <label for="usr">Correo:</label>
+      <label class="label-form" for="usr">Correo:</label>
       <input [(ngModel)]="email" type="text" class="form-control" id="email" required/>
     </div>
     <div class="form-group mt-3 mx-3">
-      <label for="pwd">Contraseña:</label>
+      <label class="label-form" for="pwd">Contraseña:</label>
       <input [(ngModel)]="password" type="password" class="form-control" id="password" required/>
     </div>
     <button
       type="button"
       class="btn btn-primary mx-auto mt-3 mb-3"
-      style="width: 30%"
+      style="width: 60%"
       (click)="registerUser()"
     >
       Registrar

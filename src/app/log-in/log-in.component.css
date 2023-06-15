@@ -1,0 +1,22 @@
+.card {
+  background-color: transparent;
+  border: 0px;
+}
+
+.lbl-form {
+  color: white;
+}
+
+.btn {
+  color: #fe5115;
+  background-color: transparent;
+  border-style: dashed;
+  border-width: 3px;
+  border-color: #fe5115;
+  border-radius: 25px;
+}
+.btn:hover {
+  color: white;
+  background-color: #fe5115;
+  border-radius: 25px;
+}

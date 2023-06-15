@@ -80,7 +80,8 @@ export class LogInComponent implements OnInit {
     this.router.navigate(['/register'], { queryParams: { role: role } });
   }
 
-  forgetPassword(): void{
-     
+  restorePassword(): void{
+    this.router.navigate(['/restore-password']);
+
   }
 }
