@@ -20,6 +20,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { HomeComponent } from './home/home.component';
 import { UserManagementComponent } from './user-management/user-management.component';
 import { RestorePasswordComponent } from './restore-password/restore-password.component';
+import { GameReportsComponent } from './game-reports/game-reports.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { RestorePasswordComponent } from './restore-password/restore-password.co
     HomeComponent,
     UserManagementComponent,
     RestorePasswordComponent,
+    GameReportsComponent,
   ],
   imports: [
     BrowserModule,

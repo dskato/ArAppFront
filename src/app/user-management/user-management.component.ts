@@ -1,19 +1,24 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiHandlerService } from 'src/services/api-handler.service';
 
-export interface User {
+export interface UserListResponse {
+  code: number;
+  message: string | null;
+  data: UserData[];
+  codeText: string;
+}
+
+export interface UserData {
   id: number;
   firstname: string;
   lastname: string;
+  age: number;
   email: string;
-  token: string | null;
   role: string;
+  token: string | null;
   createDate: string;
 }
 
@@ -23,48 +28,35 @@ export interface User {
   styleUrls: ['./user-management.component.css'],
 })
 export class UserManagementComponent implements OnInit {
-  userLs!: User[];
-  displayedColumns: string[] = [
-    'id',
-    'firstname',
-    'lastname',
-    'email',
-    'role',
-    'createDate',
-    'actions',
-  ];
-  dataSource = new MatTableDataSource<User>(this.userLs);
+  
+  constructor(private http: HttpClient, private apiHandler: ApiHandlerService) {}
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  globalUrl = this.apiHandler.apiUrl;
+  users: UserData[] = [];
 
-  constructor(private http: HttpClient, private apiHander: ApiHandlerService) {}
-
-  public getAllUsers(): Observable<User[]> {
-    return this.http
-      .get<{
-        code: number;
-        message: string;
-        data: User[];
-        codeText: string;
-      }>(this.apiHander.apiUrl + '/get-getallusers')
-      .pipe(map((response: { data: any }) => response.data));
-  }
-
+  
   ngOnInit(): void {
-    this.getAllUsers().subscribe((users) => {
-      this.userLs = users;
-      console.log(this.userLs);
-      this.dataSource.data = this.userLs;
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    });
+    this.fetchUsers();
   }
 
-  applyFilter(filterValue: string) {
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-  }
 
+  fetchUsers(): void {
+    this.http.get<UserListResponse>(this.globalUrl+'/get-getallusers')
+      .subscribe(
+        (response: UserListResponse) => {
+          this.users = response.data;
+          console.log(this.users); // Do something with the user data
+        },
+        (error) => {
+          console.error('Error fetching users:', error);
+        }
+      );
+  }
+  
+
+}
+
+/*
   editUser(user: any) {
     // Call the API to update the user data
     
@@ -87,4 +79,4 @@ export class UserManagementComponent implements OnInit {
       }
     );
   }
-}
+  */
