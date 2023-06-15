@@ -1,10 +1,58 @@
 .navbar {
-  background-color: #000000 !important;
-  color: white !important;
+  background-color: #e9eaec !important;
+  color: #151515 !important;
+  height: 10vh;
 }
-.navbar-brand{
-    color: white !important;
+.navbar-brand {
+  color: #151515 !important;
 }
-.nav-item{
-    color: white !important;   
+.nav-item {
+  color: #151515 !important;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 30vh;
+  height: 90vh;
+  padding-left: 0.5%;
+  padding-right: 0.5%;
+}
+
+.sidebar-design {
+  width: 100%;
+  height: 95%;
+  background-color: #e9eaec;
+  border-radius: 25px;
+}
+
+.sidebar-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  padding-left: 10%;
+  padding-right: 10%;
+  flex-direction: column;
+}
+
+.button-option {
+  width: 100%;
+  height: 5%;
+  justify-content: space-around;
+  display: flex;
+  align-items: center; /* Centers items vertically */
+  flex-direction: row;
+  margin-top: 10%;
+  text-decoration: none;
+}
+.button-option:hover {
+  border-bottom: 2px solid #FF0000; 
+}
+
+.label-b {
+  color: #151515 !important;
+}
+.bi {
+  color: #151515 !important;
 }

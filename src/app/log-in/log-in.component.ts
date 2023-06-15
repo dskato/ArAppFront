@@ -79,4 +79,8 @@ export class LogInComponent implements OnInit {
     var role = 'TEACHER';
     this.router.navigate(['/register'], { queryParams: { role: role } });
   }
+
+  forgetPassword(): void{
+     
+  }
 }

@@ -2,18 +2,13 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <!-- Container wrapper -->
   <div class="container-fluid">
-    
     <!-- Collapsible wrapper -->
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <!-- Navbar brand -->
-      <a class="navbar-brand mt-2 mt-lg-0" href="#">
-        ArAppFront
-      </a>
+      <a class="navbar-brand mt-2 mt-lg-0" href="#"> ArAppFront </a>
       <!-- Left links -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="#">Usuarios</a>
-        </li>
+        <li class="nav-item"></li>
       </ul>
       <!-- Left links -->
     </div>
@@ -23,14 +18,25 @@
     <div class="d-flex align-items-center">
       <!-- Icon -->
       <a class="text-reset me-3" href="#">
-        <i class="bi bi-arrow-up"></i>
+        <i class="bi bi-door-open-fill" (click)="logOut()"></i>
       </a>
-
     </div>
     <!-- Right elements -->
   </div>
   <!-- Container wrapper -->
 </nav>
-<!-- Navbar -->
 
-<app-user-management></app-user-management>
+<div class="sidebar">
+  <div class="sidebar-design">
+    <div class="sidebar-content">
+      <div class="button-option">
+        <label class="label-b">Usuarios</label>
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <div class="button-option">
+        <label class="label-b">Reportes</label>
+        <i class="bi bi-file-earmark-bar-graph-fill"></i>
+      </div>
+    </div>
+  </div>
+</div>

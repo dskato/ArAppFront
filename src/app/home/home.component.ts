@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { TokenService } from 'src/services/token.service';
 import { Router } from '@angular/router';
 
@@ -9,10 +9,20 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
 
+  isSidebarOpen: boolean = false;
+
+  
+
   constructor(private tokenService: TokenService, private router: Router) { }
 
   ngOnInit(): void {
     this.tokenService.redirectIfNotValid('/home');
   }
 
+  logOut(): void {
+    this.tokenService.removeToken();
+    this.router.navigate(['/login']);
+  }
+
+  
 }

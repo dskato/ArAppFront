@@ -19,6 +19,8 @@ import { MatTableModule } from '@angular/material/table';
 import { ToastrModule } from 'ngx-toastr';
 import { HomeComponent } from './home/home.component';
 import { UserManagementComponent } from './user-management/user-management.component';
+import { RecoverPasswordEmailComponent } from './forgot-password/recover-password-email/recover-password-email.component';
+import { SetNewPasswordComponent } from './forgot-password/set-new-password/set-new-password.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +29,8 @@ import { UserManagementComponent } from './user-management/user-management.compo
     LogInComponent,
     HomeComponent,
     UserManagementComponent,
+    RecoverPasswordEmailComponent,
+    SetNewPasswordComponent,
   ],
   imports: [
     BrowserModule,
