@@ -55,7 +55,6 @@ h2 {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  
 }
 
 .item-inpt {
@@ -64,10 +63,26 @@ h2 {
   font-size: 12px;
   text-align: center;
   border: none;
+  outline: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
   background-color: transparent;
+}
+
+#firstname-inpt.active {
+  outline: 1px #1c1c1c solid;
+  border-radius: 25px;
+}
+#firstname-inpt:focus{
+  outline: 1px #fe5115 solid;
+}
+#lastname-inpt.active {
+  outline: 1px #1c1c1c solid;
+  border-radius: 25px;
+}
+#lastname-inpt:focus{
+  outline: 1px #fe5115 solid;
 }
 
 #actions-cont {
@@ -83,26 +98,34 @@ h2 {
   align-self: center;
   border-radius: 25px;
 }
-#lbl-status{
-  
+#lbl-status {
 }
-#lbl-correo{
+#lbl-correo {
   margin-right: 2%;
 }
-#lbl-rol{
+#lbl-rol {
   margin-right: 1%;
 }
 
-.bi{
+.bi {
   color: #1c1c1c;
 }
-.bi:hover{
+.bi:hover {
   color: #fe5115;
 }
-#role-select{
+
+#role-select {
   background-color: transparent;
   align-self: center;
+  border: none;
 }
+#role-select.active {
+  outline: 0.5px #1c1c1c solid;
+}
+#role-select:focus{
+  outline: 1px #fe5115 solid;
+}
+
 #actions-cont i.active {
   color: #fe5115;
 }

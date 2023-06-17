@@ -11,19 +11,23 @@
     <label>Accion</label>
   </div>
   <div class="list-container">
-    <div class="user-list" *ngFor="let user of users; let i = index" >
+    <div class="user-list" *ngFor="let user of users; let i = index">
       <div class="itemls-container" [ngClass]="{ 'zebra-row': i % 2 === 1 }">
         <input
           class="item-inpt"
           type="text"
-          [value]="user.firstname"
+          id="firstname-inpt"
+          [ngClass]="{ active: user.editMode }"
+          [(ngModel)]="user.firstname"
           [readonly]="!user.editMode"
           (dblclick)="toggleEditMode(user)"
         />
         <input
           class="item-inpt"
           type="text"
-          [value]="user.lastname"
+          id="lastname-inpt"
+          [ngClass]="{ active: user.editMode }"
+          [(ngModel)]="user.lastname"
           [readonly]="!user.editMode"
           (dblclick)="toggleEditMode(user)"
         />
@@ -32,12 +36,17 @@
           id="status-inpt"
           type="text"
           [value]="user.status"
-          [ngStyle]="{ 'background-color': getBackgroundColor(user.status) }"
+          [ngStyle]="{ 'background-color': getStatusBackgroundColor(user.status) }"
           readonly
         />
         <input class="item-inpt" type="text" [value]="user.email" readonly />
         <div class="item-inpt">
-          <select [(ngModel)]="user.role" [disabled]="!user.editMode" id="role-select">
+          <select
+            [(ngModel)]="user.role"
+            [disabled]="!user.editMode"
+            [ngClass]="{ active: user.editMode }"
+            id="role-select"
+          >
             <option value="STUDENT">STUDENT</option>
             <option value="TEACHER">TEACHER</option>
             <option value="ADMIN">ADMIN</option>
@@ -50,8 +59,17 @@
           readonly
         />
         <div class="item-inpt" id="actions-cont">
-          <i (click)="toggleEditMode(user)" [ngClass]="{ 'active': user.editMode }" class="bi bi-pencil-square"></i>
-          <i class="bi bi-x-circle-fill"></i>
+          <i
+            (click)="toggleEditMode(user)"
+            [ngClass]="{ active: user.editMode }"
+            class="bi bi-pencil-square"
+          ></i>
+          <i [ngStyle]="{ 'color': getIconStatusBackgroundColor(user.status) }" (click)="changeUserStatus(user)" class="bi bi-person-badge-fill"></i>
+          <i
+            (click)="editUser(user)"
+            class="bi bi-check-circle-fill"
+            *ngIf="user.editMode"
+          ></i>
         </div>
       </div>
     </div>
