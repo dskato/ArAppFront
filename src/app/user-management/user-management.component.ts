@@ -1,7 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
 import { ApiHandlerService } from 'src/services/api-handler.service';
 import { ToastrService } from 'ngx-toastr';
 

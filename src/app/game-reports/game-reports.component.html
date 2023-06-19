@@ -1,1 +1,39 @@
-<p>game-reports works!</p>
+<div class="bbox">
+  <div class="reports-cont">
+    <div class="config-menu">
+      <div class="item-cont">
+        <label for="role-select" class="lbl-conf">Tipo de reporte</label>
+        <select class="select-conf" name="role-select" id="role-select">
+          <option value="Ratio entre aciertos y fallos en los intentos de cada juego por clase y alumno">Ratio entre aciertos y fallos en los intentos de cada juego por clase y alumno</option>
+          <option value="Juego con el índice más alto de fallos">Juego con el índice más alto de fallos</option>
+          <option value="Juego con el índice más alto de aciertos">Juego con el índice más alto de aciertos</option>
+          <option value="Tiempo empleado en finalizar el juego por clase y alumno">Tiempo empleado en finalizar el juego por clase y alumno</option>
+          <option value="Ranking en base de tiempo empleado de alumnos por juego y aula">Ranking en base de tiempo empleado de alumnos por juego y aula</option>
+        </select>
+      </div>
+    </div>
+    <div class="graphic-cont">
+      <div class="graph" id="g1">
+        <ngx-charts-bar-vertical-2d
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfr"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [legendTitle]="legendTitle"
+          (select)="onSelect($event)"
+          (activate)="onActivate($event)"
+          (deactivate)="onDeactivate($event)"
+        >
+        </ngx-charts-bar-vertical-2d>
+      </div>
+      <div class="graph" id="g2"></div>
+    </div>
+  </div>
+</div>
