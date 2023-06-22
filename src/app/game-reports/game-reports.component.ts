@@ -126,7 +126,7 @@ export class GameReportsComponent implements OnInit {
           console.log(this.sfr);
         },
         (error) => {
-          console.error('Error fetching sfr:', error);
+          console.error('Error fetching sfr: ', error);
         }
       );
   }
