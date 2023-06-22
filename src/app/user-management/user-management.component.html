@@ -4,24 +4,72 @@
   <div class="title-bar">
     <label>Nombre</label>
     <label>Apellido</label>
-    <label>Estado</label>
-    <label>Correo</label>
-    <label>Rol</label>
+    <label id="lbl-status">Estado</label>
+    <label id="lbl-correo">Correo</label>
+    <label id="lbl-rol">Rol</label>
     <label>F. Creacion</label>
     <label>Accion</label>
   </div>
   <div class="list-container">
-    <div class="user-list" *ngFor="let user of users">
-      <div class="itemls-container">
-        <input class="item-inpt" type="text" [value]="user.firstname" readonly />
-        <input class="item-inpt" type="text" [value]="user.lastname" readonly />
-        <input class="item-inpt" id="age-inpt" type="text" [value]="user.age" readonly />
+    <div class="user-list" *ngFor="let user of users; let i = index">
+      <div class="itemls-container" [ngClass]="{ 'zebra-row': i % 2 === 1 }">
+        <input
+          class="item-inpt"
+          type="text"
+          id="firstname-inpt"
+          [ngClass]="{ active: user.editMode }"
+          [(ngModel)]="user.firstname"
+          [readonly]="!user.editMode"
+          (dblclick)="toggleEditMode(user)"
+        />
+        <input
+          class="item-inpt"
+          type="text"
+          id="lastname-inpt"
+          [ngClass]="{ active: user.editMode }"
+          [(ngModel)]="user.lastname"
+          [readonly]="!user.editMode"
+          (dblclick)="toggleEditMode(user)"
+        />
+        <input
+          class="item-inpt"
+          id="status-inpt"
+          type="text"
+          [value]="user.status"
+          [ngStyle]="{ 'background-color': getStatusBackgroundColor(user.status) }"
+          readonly
+        />
         <input class="item-inpt" type="text" [value]="user.email" readonly />
-        <input class="item-inpt" type="text" [value]="user.role" readonly />
-        <input class="item-inpt" type="text" [value]="user.createDate" readonly />
+        <div class="item-inpt">
+          <select
+            [(ngModel)]="user.role"
+            [disabled]="!user.editMode"
+            [ngClass]="{ active: user.editMode }"
+            id="role-select"
+          >
+            <option value="STUDENT">STUDENT</option>
+            <option value="TEACHER">TEACHER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+        <input
+          class="item-inpt"
+          type="text"
+          [value]="user.createDate"
+          readonly
+        />
         <div class="item-inpt" id="actions-cont">
-            <i class="bi bi-pencil-square"></i>
-            <i class="bi bi-x-circle-fill"></i>
+          <i
+            (click)="toggleEditMode(user)"
+            [ngClass]="{ active: user.editMode }"
+            class="bi bi-pencil-square"
+          ></i>
+          <i [ngStyle]="{ 'color': getIconStatusBackgroundColor(user.status) }" (click)="changeUserStatus(user)" class="bi bi-person-badge-fill"></i>
+          <i
+            (click)="editUser(user)"
+            class="bi bi-check-circle-fill"
+            *ngIf="user.editMode"
+          ></i>
         </div>
       </div>
     </div>

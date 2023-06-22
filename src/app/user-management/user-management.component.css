@@ -62,8 +62,27 @@ h2 {
   height: 80%;
   font-size: 12px;
   text-align: center;
-  background-color: transparent;
   border: none;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: transparent;
+}
+
+#firstname-inpt.active {
+  outline: 1px #1c1c1c solid;
+  border-radius: 25px;
+}
+#firstname-inpt:focus{
+  outline: 1px #fe5115 solid;
+}
+#lastname-inpt.active {
+  outline: 1px #1c1c1c solid;
+  border-radius: 25px;
+}
+#lastname-inpt:focus{
+  outline: 1px #fe5115 solid;
 }
 
 #actions-cont {
@@ -73,6 +92,43 @@ h2 {
   justify-content: space-around;
   font-size: 20px;
 }
-#age-inpt {
-  width: 12%;
+#status-inpt {
+  height: 30px;
+  width: 10%;
+  align-self: center;
+  border-radius: 25px;
+}
+#lbl-status {
+}
+#lbl-correo {
+  margin-right: 2%;
+}
+#lbl-rol {
+  margin-right: 1%;
+}
+
+.bi {
+  color: #1c1c1c;
+}
+.bi:hover {
+  color: #fe5115;
+}
+
+#role-select {
+  background-color: transparent;
+  align-self: center;
+  border: none;
+}
+#role-select.active {
+  outline: 0.5px #1c1c1c solid;
+}
+#role-select:focus{
+  outline: 1px #fe5115 solid;
+}
+
+#actions-cont i.active {
+  color: #fe5115;
+}
+.itemls-container.zebra-row {
+  background-color: #ffffff; /* Define the zebra color */
 }

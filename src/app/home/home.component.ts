@@ -9,7 +9,8 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
 
-  isSidebarOpen: boolean = false;
+  showUserManagementComponent = false;
+  showGameReportsComponent = true;
 
   
 
@@ -24,5 +25,14 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  showUserManagement() {
+    this.showUserManagementComponent = true;
+    this.showGameReportsComponent = false;
+  }
+
+  showGameReports() {
+    this.showUserManagementComponent = false;
+    this.showGameReportsComponent = true;
+  }
   
 }

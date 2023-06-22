@@ -58,7 +58,10 @@
   border-bottom: 2px solid #ff0000;
   color: #ff0000;
 }
-
+.clicked  {
+  border-bottom: 2px solid #ff0000;
+  color: #ff0000;
+}
 
 .module-container{
   display: flex;

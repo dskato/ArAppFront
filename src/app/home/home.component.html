@@ -32,19 +32,20 @@
   <div class="sidebar">
     <div class="sidebar-design">
       <div class="sidebar-content">
-        <div class="button-option">
+        <div class="button-option" (click)="showUserManagement()"  [class.clicked]="showUserManagementComponent">
           <label class="label-b">Usuarios</label>
-          <i class="bi bi-people-fill"></i>
+          <i class="bi bi-people-fill"    ></i>
         </div>
-        <div class="button-option">
+        <div class="button-option" (click)="showGameReports()" [class.clicked]="showGameReportsComponent">
           <label class="label-b">Reportes</label>
-          <i class="bi bi-file-earmark-bar-graph-fill"></i>
+          <i class="bi bi-file-earmark-bar-graph-fill" ></i>
         </div>
       </div>
     </div>
   </div>
   <!-- Module container -->
   <div class="module-container">
-    <app-user-management></app-user-management>
+    <app-user-management *ngIf="showUserManagementComponent"></app-user-management>
+    <app-game-reports *ngIf="showGameReportsComponent"></app-game-reports>
   </div>
 </div>
