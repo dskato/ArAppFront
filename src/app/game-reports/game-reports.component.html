@@ -3,17 +3,111 @@
     <div class="config-menu">
       <div class="item-cont">
         <label for="role-select" class="lbl-conf">Tipo de reporte</label>
-        <select class="select-conf" name="role-select" id="role-select">
-          <option value="Ratio entre aciertos y fallos en los intentos de cada juego por clase y alumno">Ratio entre aciertos y fallos en los intentos de cada juego por clase y alumno</option>
-          <option value="Juego con el índice más alto de fallos">Juego con el índice más alto de fallos</option>
-          <option value="Juego con el índice más alto de aciertos">Juego con el índice más alto de aciertos</option>
-          <option value="Tiempo empleado en finalizar el juego por clase y alumno">Tiempo empleado en finalizar el juego por clase y alumno</option>
-          <option value="Ranking en base de tiempo empleado de alumnos por juego y aula">Ranking en base de tiempo empleado de alumnos por juego y aula</option>
+        <select
+          class="select-conf"
+          name="role-select"
+          id="role-select"
+          [(ngModel)]="sReportOption"
+          (change)="validateOption()"
+        >
+          <option *ngFor="let option of reportOptions" [value]="option">
+            {{ option }}
+          </option>
         </select>
       </div>
+      <div class="fail-ratio-cont" *ngIf="vvFailRatioCont">
+        <label for="reportby" class="lbl-conf">Generar reporte por:</label>
+        <select
+          class="select-conf"
+          name="reportby-select"
+          id="reportby-select"
+          [(ngModel)]="reportByOption"
+          (change)="validateReportByOption()"
+        >
+          <option *ngFor="let type of filterOption" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+
+        <div class="class-opt-cont" *ngIf="vvIsFilterByClass">
+          <label for="search-box-fr" class="lbl-conf">Buscar clase</label>
+          <input
+            class="item-inpt"
+            type="text"
+            [(ngModel)]="searchTextClass"
+            id="search-box-fr"
+            name="search-box-fr"
+            placeholder="Buscar clase"
+            (input)="onSearchClassChange()"
+          />
+          <select
+            class="select-conf"
+            name="class-select"
+            id="class-select"
+            [(ngModel)]="selectedClass"
+            (change)="validateGenerateButtonVisibility()"
+          >
+            <option
+              *ngFor="let classItem of classOptions"
+              [ngValue]="classItem"
+            >
+              {{ classItem.code }}
+            </option>
+          </select>
+        </div>
+
+        <div class="class-opt-cont" *ngIf="vvIsFilterByUser">
+          <label for="search-box-fr" class="lbl-conf">Buscar usuario</label>
+          <input
+            class="item-inpt"
+            type="text"
+            [(ngModel)]="searchTextUser"
+            id="search-box-fr"
+            name="search-box-fr"
+            placeholder="Buscar usuario"
+            (input)="onSearchUserChange()"
+          />
+          <select
+            class="select-conf"
+            name="user-select"
+            id="user-select"
+            [(ngModel)]="selectedUser"
+            (change)="validateGenerateButtonVisibility()"
+          >
+            <option *ngFor="let userItem of userOptions" [ngValue]="userItem">
+              {{ userItem.firstname + " " + userItem.lastname }}
+            </option>
+          </select>
+        </div>
+
+        <label for="type-of-chart" class="lbl-conf" id="lbl-typechart"
+          >Tipo de Grafico:</label
+        >
+        <select
+          class="select-conf"
+          name="type-of-chart"
+          id="type-of-chart"
+          [(ngModel)]="selectedTypeOfChart"
+          (click)="changeChart()"
+        >
+          <option *ngFor="let chart of typeOfChartOption" [ngValue]="chart">
+            {{ chart }}
+          </option>
+        </select>
+
+        <button
+          (click)="generateReportBarCharts()"
+          type="button"
+          class="btn"
+          *ngIf="vvButtonGenerateReport"
+        >
+          Generar Reporte
+        </button>
+      </div>
     </div>
+
     <div class="graphic-cont">
-      <div class="graph" id="g1">
+      <div class="graph" id="g1" *ngIf="vvBarVertical2d">
         <ngx-charts-bar-vertical-2d
           [view]="view"
           [scheme]="colorScheme"
@@ -33,7 +127,63 @@
         >
         </ngx-charts-bar-vertical-2d>
       </div>
-      <div class="graph" id="g2"></div>
+      <div class="graph" id="g2" *ngIf="vvBarHorizontalStacked">
+        <ngx-charts-bar-horizontal-stacked
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfr"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [legendTitle]="legendTitle"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          (select)="onSelect($event)"
+        >
+        </ngx-charts-bar-horizontal-stacked>
+      </div>
+
+      <div class="graph" id="g3" *ngIf="vvBarArea">
+        <ngx-charts-area-chart
+          [view]="view"
+          [scheme]="colorScheme"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [timeline]="timeline"
+          [results]="sfr"
+          (select)="onSelect($event)"
+        >
+        </ngx-charts-area-chart>
+      </div>
+      <div class="graph" id="g4" *ngIf="vvBarLines">
+        <ngx-charts-line-chart
+          [view]="view"
+          [scheme]="colorScheme"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [timeline]="timeline"
+          [results]="sfr"
+          (select)="onSelect($event)"
+          (select)="onSelect($event)"
+          (activate)="onActivate($event)"
+          (deactivate)="onDeactivate($event)"
+        >
+        </ngx-charts-line-chart>
+      </div>
     </div>
   </div>
 </div>
+
