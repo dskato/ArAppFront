@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class ApiHandlerService {
   
-  public apiUrl: string = 'https://arappbackend.azurewebsites.net';
+  public apiUrl: string = 'https://arappbackend.onrender.com';
   
   
 }
