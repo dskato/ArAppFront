@@ -44,7 +44,7 @@ export class GameReportsComponent implements OnInit {
     'Area de Barras',
     'Líneas de Barras',
   ];
-  difficultyOptions: string[] = ['EASY', 'MEDIUM', 'HARD'];
+  difficultyOptions: string[] = ['Facil', 'Intermedio', 'Dificil'];
   difficultyOption!: string;
 
   //div visibility variables
@@ -167,6 +167,8 @@ export class GameReportsComponent implements OnInit {
   }
 
   generateReportBarCharts() {
+
+    this.homologateSelections();
     if (
       this.selectedClass &&
       this.selectedClass.id !== undefined &&
@@ -189,8 +191,6 @@ export class GameReportsComponent implements OnInit {
         this.difficultyOption
       );
     }
-    console.log(this.selectedClass.id);
-    console.log(this.selectedUser.id);
   }
 
   //Charts functions
@@ -205,5 +205,19 @@ export class GameReportsComponent implements OnInit {
     this.vvBarVertical2d = false;
     this.vvBarArea = false;
     this.vvBarLines = false;
+  }
+
+  homologateSelections(){
+    if(this.difficultyOption != null){
+      if(this.difficultyOption == 'Facil'){
+        this.difficultyOption = 'EASY'
+      }
+      if(this.difficultyOption == 'Intermedio'){
+        this.difficultyOption = 'MEDIUM'
+      }
+      if(this.difficultyOption == 'Dificil'){
+        this.difficultyOption = 'HARD'
+      }
+    }
   }
 }

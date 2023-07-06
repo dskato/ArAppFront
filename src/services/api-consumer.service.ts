@@ -78,7 +78,7 @@ export class ApiConsumerService {
           console.error('Error fetching sfr:', error);
         }
       );
-      return this.sfr;
+    return this.sfr;
   }
 
   getSuccesFailRatioByUserId(
@@ -89,6 +89,62 @@ export class ApiConsumerService {
       encodeURIComponent(userId) + '/' + encodeURIComponent(difficulty);
     this.http
       .get<SFRResponse>(this.globalUrl + '/get-rsfbyuserid/' + params)
+      .subscribe(
+        (response: SFRResponse) => {
+          this.sfr = [];
+          this.sfr = this.sfr.concat(response.data);
+        },
+        (error) => {
+          console.error('Error fetching sfr:', error);
+        }
+      );
+    return this.sfr;
+  }
+
+  //-- Most fail or success
+  //1 CLASS
+  //0 USER
+  //1 FAIL
+  //0 SUCCESS
+  getMostFailsOrSuccessByClassOrUser(
+    userOrClass: number,
+    failOrSuccess: number,
+    difficulty: string,
+    userOrClassId: number
+  ): BarChartsInterface[] {
+    var params =
+      encodeURIComponent(userOrClass) +
+      '/' +
+      encodeURIComponent(failOrSuccess) +
+      '/' +
+      encodeURIComponent(difficulty) +
+      '/' +
+      encodeURIComponent(userOrClassId);
+    this.http
+      .get<SFRResponse>(this.globalUrl + '/get-GetMostFailsOrSuccessByClassOrUser/' + params)
+      .subscribe(
+        (response: SFRResponse) => {
+          this.sfr = [];
+          this.sfr = this.sfr.concat(response.data);
+        },
+        (error) => {
+          console.error('Error fetching sfr:', error);
+        }
+      );
+    return this.sfr;
+  }
+
+  //1 CLASS
+  //0 USER
+  getElapsedTimeByClassOrUser(userOrClass: number, difficulty: string, userOrClassId:number): BarChartsInterface[] {
+    var params =
+      encodeURIComponent(userOrClass) +
+      '/' +
+      encodeURIComponent(difficulty) +
+      '/' +
+      encodeURIComponent(userOrClassId);
+    this.http
+      .get<SFRResponse>(this.globalUrl + '/get-ElapsedTimeByClassOrUser/' + params)
       .subscribe(
         (response: SFRResponse) => {
           this.sfr = [];
