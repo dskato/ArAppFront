@@ -29,6 +29,18 @@
           </option>
         </select>
 
+        <label for="difficulty" class="lbl-conf">Dificultad:</label>
+        <select
+          class="select-conf"
+          name="difficulty-select"
+          id="difficulty-select"
+          [(ngModel)]="difficultyOption"
+        >
+          <option *ngFor="let difficulty of difficultyOptions" [value]="difficulty">
+            {{ difficulty }}
+          </option>
+        </select>
+
         <div class="class-opt-cont" *ngIf="vvIsFilterByClass">
           <label for="search-box-fr" class="lbl-conf">Buscar clase</label>
           <input

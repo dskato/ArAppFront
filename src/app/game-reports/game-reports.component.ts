@@ -1,41 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Color, ScaleType } from '@swimlane/ngx-charts';
 import { HttpClient } from '@angular/common/http';
+//-- Interfaces
+import { SFRResponse } from 'src/Interfaces/SFRResponse';
+import { ClassItem } from 'src/Interfaces/ClassItem';
+import { UserItem } from 'src/Interfaces/UserItem';
+import { BarChartsInterface } from 'src/Interfaces/BarChartsInterface';
+//-- Services
 import { ApiHandlerService } from 'src/services/api-handler.service';
-
-export interface SFRResponse {
-  code: number;
-  message: string | null;
-  data: any[];
-  codeText: string;
-}
-interface ClassItem {
-  id: number;
-  className: string;
-  grade: string;
-  code: string;
-}
-
-interface UserItem {
-  id: number;
-  firstname: string;
-  lastname: string;
-  age: number;
-  email: string;
-  role: string;
-  status: string;
-  token: string | null;
-  createDate: string;
-}
-
-
-export interface BarChartsInterface {
-  name: string;
-  series: {
-    name: string;
-    value: number;
-  };
-}
+import { ApiConsumerService } from 'src/services/api-consumer.service';
 
 @Component({
   selector: 'app-game-reports',
@@ -43,7 +16,6 @@ export interface BarChartsInterface {
   styleUrls: ['./game-reports.component.css'],
 })
 export class GameReportsComponent implements OnInit {
-
   globalUrl = this.apiHandler.apiUrl;
 
   //Reports Options
@@ -52,7 +24,7 @@ export class GameReportsComponent implements OnInit {
     'Juego con el índice más alto de fallos',
     'Juego con el índice más alto de aciertos',
     'Tiempo empleado en finalizar el juego por clase y alumno',
-    'Ranking en base de tiempo empleado de alumnos por juego y aula'
+    'Ranking en base de tiempo empleado de alumnos por juego y aula',
   ];
   sReportOption!: string;
 
@@ -63,15 +35,17 @@ export class GameReportsComponent implements OnInit {
   selectedClass: ClassItem = {} as ClassItem;
   userOptions: UserItem[] = [];
   selectedUser: UserItem = {} as UserItem;
-  filterOption: string[] = [
-    'Clase', 'Usuario'
-  ];
+  filterOption: string[] = ['Clase', 'Usuario'];
   reportByOption!: string;
   selectedTypeOfChart!: string;
   typeOfChartOption: string[] = [
-    'Barras Verticales', 'Barras Horizontales Apiladas', 'Area de Barras', 'Líneas de Barras'
+    'Barras Verticales',
+    'Barras Horizontales Apiladas',
+    'Area de Barras',
+    'Líneas de Barras',
   ];
-
+  difficultyOptions: string[] = ['EASY', 'MEDIUM', 'HARD'];
+  difficultyOption!: string;
 
   //div visibility variables
   vvFailRatioCont = true;
@@ -103,84 +77,28 @@ export class GameReportsComponent implements OnInit {
     selectable: true,
     name: 'Customer Usage',
   };
-
   sfr: BarChartsInterface[] = [];
 
-
-
-  ngOnInit(): void {
-
-  }
-
-  constructor(private http: HttpClient, private apiHandler: ApiHandlerService) {
+  ngOnInit(): void {}
+  constructor(
+    private http: HttpClient,
+    private apiHandler: ApiHandlerService,
+    private apiConsumer: ApiConsumerService
+  ) {
     //Object.assign(this, { this.sfr });
   }
 
-  getSuccesFailRatioByClassId(classId: number): void {
-    this.http
-      .get<SFRResponse>(this.globalUrl + '/get-rsfbyclassid/' + encodeURIComponent(classId))
-      .subscribe(
-        (response: SFRResponse) => {
-          this.sfr = [];
-          this.sfr = this.sfr.concat(response.data);
-          console.log(this.sfr);
-        },
-        (error) => {
-          console.error('Error fetching sfr:', error);
-        }
-      );
-  }
-
-  getSuccesFailRatioByUserId(userId: number): void {
-    this.http
-      .get<SFRResponse>(this.globalUrl + '/get-rsfbyuserid/' + encodeURIComponent(userId))
-      .subscribe(
-        (response: SFRResponse) => {
-          this.sfr = [];
-          this.sfr = this.sfr.concat(response.data);
-          console.log(this.sfr);
-        },
-        (error) => {
-          console.error('Error fetching sfr:', error);
-        }
-      );
-  }
-
-  fetchClasessByTxt(): void {
-    this.http
-      .get<SFRResponse>(this.globalUrl + '/get-GetAllClassesByTextSearch/' + encodeURIComponent(this.searchTextClass))
-      .subscribe(
-        (response: SFRResponse) => {
-          this.classOptions = this.classOptions.concat(response.data);
-        },
-        (error) => {
-          console.error('Error fetching clasess:', error);
-        }
-      );
-  }
-
-  fetchUsersByTxt(): void {
-    this.http
-      .get<SFRResponse>(this.globalUrl + '/get-GetAllUsersByTextSearch/' + encodeURIComponent(this.searchTextUser))
-      .subscribe(
-        (response: SFRResponse) => {
-          this.userOptions = this.userOptions.concat(response.data);
-        },
-        (error) => {
-          console.error('Error fetching users:', error);
-        }
-      );
-  }
-
   onSearchClassChange(): void {
-    this.fetchClasessByTxt();
+    console.log(this.searchTextClass);
+    this.classOptions = this.apiConsumer.fetchClasessByTxt(
+      this.searchTextClass
+    );
   }
   onSearchUserChange(): void {
-    this.fetchUsersByTxt();
+    this.userOptions = this.apiConsumer.fetchUsersByTxt(this.searchTextUser);
   }
 
   validateOption(): void {
-
     if (this.sReportOption == this.reportOptions[0]) {
       this.vvFailRatioCont = true;
     } else {
@@ -189,8 +107,6 @@ export class GameReportsComponent implements OnInit {
   }
 
   validateGenerateButtonVisibility() {
-
-
     if (this.vvIsFilterByClass == true) {
       if (this.selectedClass == null) {
         this.vvButtonGenerateReport = false;
@@ -205,75 +121,84 @@ export class GameReportsComponent implements OnInit {
         this.vvButtonGenerateReport = true;
       }
     }
-
   }
 
   validateReportByOption(): void {
-
     this.vvButtonGenerateReport = false;
     this.sfr = [];
     this.selectedClass = {} as ClassItem;
     this.selectedUser = {} as UserItem;
 
-    if (this.reportByOption == this.filterOption[0]) { //Filter by class
+    if (this.reportByOption == this.filterOption[0]) {
+      //Filter by class
       this.vvIsFilterByClass = true;
       this.vvIsFilterByUser = false;
-      
-    } else { // Filter by user
+    } else {
+      // Filter by user
       this.vvIsFilterByClass = false;
       this.vvIsFilterByUser = true;
-      
     }
-
   }
 
   changeChart() {
-
     this.setAllChartsInvisible();
-    if (this.selectedTypeOfChart == this.typeOfChartOption[0]) { // Barras verticales
+    if (this.selectedTypeOfChart == this.typeOfChartOption[0]) {
+      // Barras verticales
       this.vvBarVertical2d = true;
-      this.xAxisLabel = "Clase";
-      this.legendTitle = "Estudiantes";
+      this.xAxisLabel = 'Clase';
+      this.legendTitle = 'Estudiantes';
     }
-    if (this.selectedTypeOfChart == this.typeOfChartOption[1]) { // Barras horizontales
-      this.vvBarHorizontalStacked = true;  
-      this.xAxisLabel = "Estudiante";
-      this.legendTitle = "Clases";
+    if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
+      // Barras horizontales
+      this.vvBarHorizontalStacked = true;
+      this.xAxisLabel = 'Estudiante';
+      this.legendTitle = 'Clases';
     }
-    if (this.selectedTypeOfChart == this.typeOfChartOption[2]) { // Area de Barras
+    if (this.selectedTypeOfChart == this.typeOfChartOption[2]) {
+      // Area de Barras
       this.vvBarArea = true;
-      this.xAxisLabel = "Estudiantes";
-      this.legendTitle = "Clases";
+      this.xAxisLabel = 'Estudiantes';
+      this.legendTitle = 'Clases';
     }
-    if (this.selectedTypeOfChart == this.typeOfChartOption[3]) { // Area de Lineas
+    if (this.selectedTypeOfChart == this.typeOfChartOption[3]) {
+      // Area de Lineas
       this.vvBarLines = true;
     }
-  };
+  }
 
   generateReportBarCharts() {
-    if (this.selectedClass && this.selectedClass.id !== undefined && this.selectedClass.id !== null) {
-      this.getSuccesFailRatioByClassId(this.selectedClass.id);
-
+    if (
+      this.selectedClass &&
+      this.selectedClass.id !== undefined &&
+      this.selectedClass.id !== null &&
+      this.difficultyOption != null
+    ) {
+      this.sfr = this.apiConsumer.getSuccesFailRatioByClassId(
+        this.selectedClass.id,
+        this.difficultyOption
+      );
     }
-    if (this.selectedUser && this.selectedUser.id !== undefined && this.selectedUser.id !== null) {
-      this.getSuccesFailRatioByUserId(this.selectedUser.id);
-
+    if (
+      this.selectedUser &&
+      this.selectedUser.id !== undefined &&
+      this.selectedUser.id !== null &&
+      this.difficultyOption != null
+    ) {
+      this.sfr = this.apiConsumer.getSuccesFailRatioByUserId(
+        this.selectedUser.id,
+        this.difficultyOption
+      );
     }
     console.log(this.selectedClass.id);
     console.log(this.selectedUser.id);
   }
 
+  //Charts functions
+  onSelect(data: any): void {}
 
-  onSelect(data: any): void {
+  onActivate(data: any): void {}
 
-  }
-
-  onActivate(data: any): void {
-  }
-
-  onDeactivate(data: any): void {
-  }
-
+  onDeactivate(data: any): void {}
 
   setAllChartsInvisible() {
     this.vvBarHorizontalStacked = false;
@@ -281,7 +206,4 @@ export class GameReportsComponent implements OnInit {
     this.vvBarArea = false;
     this.vvBarLines = false;
   }
-
-
 }
-
