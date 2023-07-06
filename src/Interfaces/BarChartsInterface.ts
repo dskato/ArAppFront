@@ -3,5 +3,5 @@ export interface BarChartsInterface {
     series: {
       name: string;
       value: number;
-    };
+    }[];
   }

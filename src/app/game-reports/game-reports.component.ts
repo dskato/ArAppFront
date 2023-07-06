@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Color, ScaleType } from '@swimlane/ngx-charts';
 import { HttpClient } from '@angular/common/http';
 //-- Interfaces
-import { SFRResponse } from 'src/Interfaces/SFRResponse';
 import { ClassItem } from 'src/Interfaces/ClassItem';
 import { UserItem } from 'src/Interfaces/UserItem';
 import { BarChartsInterface } from 'src/Interfaces/BarChartsInterface';
+import { GamesInterface } from 'src/Interfaces/GamesInterface';
 //-- Services
 import { ApiHandlerService } from 'src/services/api-handler.service';
 import { ApiConsumerService } from 'src/services/api-consumer.service';
@@ -21,8 +21,7 @@ export class GameReportsComponent implements OnInit {
   //Reports Options
   reportOptions: string[] = [
     'Ratio entre aciertos y fallos en los intentos de cada juego por clase y alumno',
-    'Juego con el índice más alto de fallos',
-    'Juego con el índice más alto de aciertos',
+    'Juego con el índice más alto de aciertos o fallos por clase y alumno',
     'Tiempo empleado en finalizar el juego por clase y alumno',
     'Ranking en base de tiempo empleado de alumnos por juego y aula',
   ];
@@ -46,12 +45,18 @@ export class GameReportsComponent implements OnInit {
   ];
   difficultyOptions: string[] = ['Facil', 'Intermedio', 'Dificil'];
   difficultyOption!: string;
-
+  difficultyOptionFinal!: string;
+  gamesOptions!: GamesInterface[];
+  gameOption!: GamesInterface;
+  failOrSuccessOptions: string[] = ['Aciertos', 'Fallos'];
+  failOrSuccessOption!: string;
   //div visibility variables
   vvFailRatioCont = true;
   vvIsFilterByClass = false;
   vvIsFilterByUser = false;
   vvButtonGenerateReport = false;
+  vvGameList = false;
+  vvFoS = false;
 
   //charts visibility variables
   vvBarVertical2d = true;
@@ -80,6 +85,7 @@ export class GameReportsComponent implements OnInit {
   sfr: BarChartsInterface[] = [];
 
   ngOnInit(): void {}
+
   constructor(
     private http: HttpClient,
     private apiHandler: ApiHandlerService,
@@ -89,36 +95,99 @@ export class GameReportsComponent implements OnInit {
   }
 
   onSearchClassChange(): void {
-    console.log(this.searchTextClass);
-    this.classOptions = this.apiConsumer.fetchClasessByTxt(
-      this.searchTextClass
+    this.apiConsumer.fetchClasessByTxt(this.searchTextClass).subscribe(
+      (classes: ClassItem[]) => {
+        this.classOptions = classes;
+      },
+      (error) => {
+        console.error('Error fetching classes:', error);
+        this.classOptions = [];
+      }
     );
   }
+
   onSearchUserChange(): void {
-    this.userOptions = this.apiConsumer.fetchUsersByTxt(this.searchTextUser);
+    this.apiConsumer.fetchUsersByTxt(this.searchTextUser).subscribe(
+      (classes: UserItem[]) => {
+        this.userOptions = classes;
+      },
+      (error) => {
+        console.error('Error fetching classes:', error);
+        this.userOptions = [];
+      }
+    );
   }
 
   validateOption(): void {
+    this.sfr = [];
+    this.selectedClass = {} as ClassItem;
+    this.selectedUser = {} as UserItem;
+    this.gameOption = {} as GamesInterface;
+    this.vvButtonGenerateReport = false;
+
     if (this.sReportOption == this.reportOptions[0]) {
+      //---
       this.vvFailRatioCont = true;
-    } else {
-      this.vvFailRatioCont = false;
+      this.vvGameList = false;
+      this.vvFoS = false;
+    }
+    if (
+      this.sReportOption == this.reportOptions[1] 
+    ) {
+      //--
+      this.fillGameOptions();
+      this.vvFailRatioCont = true;
+      this.vvGameList = true;
+      this.vvFoS = true;
     }
   }
 
   validateGenerateButtonVisibility() {
-    if (this.vvIsFilterByClass == true) {
-      if (this.selectedClass == null) {
-        this.vvButtonGenerateReport = false;
-      } else {
-        this.vvButtonGenerateReport = true;
+    if (
+      this.sReportOption == this.reportOptions[0] ||
+      this.sReportOption == this.reportOptions[2]
+    ) {
+      if (this.vvIsFilterByClass == true) {
+        if (this.selectedClass == null || this.difficultyOption.trim() === '') {
+          this.vvButtonGenerateReport = false;
+        } else {
+          this.vvButtonGenerateReport = true;
+        }
+      }
+      if (this.vvIsFilterByUser == true) {
+        if (this.selectedUser == null || this.difficultyOption.trim() === '') {
+          this.vvButtonGenerateReport = false;
+        } else {
+          this.vvButtonGenerateReport = true;
+        }
       }
     }
-    if (this.vvIsFilterByUser == true) {
-      if (this.selectedUser == null) {
-        this.vvButtonGenerateReport = false;
-      } else {
-        this.vvButtonGenerateReport = true;
+    if (
+      this.sReportOption == this.reportOptions[1] 
+    ) {
+      if (this.vvIsFilterByClass == true) {
+        if (
+          this.selectedClass == null ||
+          this.difficultyOption.trim() === '' ||
+          this.gameOption == null ||
+          this.failOrSuccessOption == null
+        ) {
+          this.vvButtonGenerateReport = false;
+        } else {
+          this.vvButtonGenerateReport = true;
+        }
+      }
+      if (this.vvIsFilterByUser == true) {
+        if (
+          this.selectedUser == null ||
+          this.difficultyOption.trim() === '' ||
+          this.gameOption == null ||
+          this.failOrSuccessOption == null
+        ) {
+          this.vvButtonGenerateReport = false;
+        } else {
+          this.vvButtonGenerateReport = true;
+        }
       }
     }
   }
@@ -167,29 +236,18 @@ export class GameReportsComponent implements OnInit {
   }
 
   generateReportBarCharts() {
-
+    this.sfr = [];
     this.homologateSelections();
-    if (
-      this.selectedClass &&
-      this.selectedClass.id !== undefined &&
-      this.selectedClass.id !== null &&
-      this.difficultyOption != null
-    ) {
-      this.sfr = this.apiConsumer.getSuccesFailRatioByClassId(
-        this.selectedClass.id,
-        this.difficultyOption
-      );
+    if (this.sReportOption == this.reportOptions[0]) {
+      this.generateRatioReport();
     }
     if (
-      this.selectedUser &&
-      this.selectedUser.id !== undefined &&
-      this.selectedUser.id !== null &&
-      this.difficultyOption != null
+      this.sReportOption == this.reportOptions[1] 
     ) {
-      this.sfr = this.apiConsumer.getSuccesFailRatioByUserId(
-        this.selectedUser.id,
-        this.difficultyOption
-      );
+      this.generateFailSuccessIndex();
+    }
+    if (this.sReportOption == this.reportOptions[2]) {
+      this.generateElapsedTimeByClassOrUser();
     }
   }
 
@@ -207,17 +265,193 @@ export class GameReportsComponent implements OnInit {
     this.vvBarLines = false;
   }
 
-  homologateSelections(){
-    if(this.difficultyOption != null){
-      if(this.difficultyOption == 'Facil'){
-        this.difficultyOption = 'EASY'
+  homologateSelections() {
+    if (this.difficultyOption != null) {
+      if (this.difficultyOption == 'Facil') {
+        this.difficultyOptionFinal = 'EASY';
       }
-      if(this.difficultyOption == 'Intermedio'){
-        this.difficultyOption = 'MEDIUM'
+      if (this.difficultyOption == 'Intermedio') {
+        this.difficultyOptionFinal = 'MEDIUM';
       }
-      if(this.difficultyOption == 'Dificil'){
-        this.difficultyOption = 'HARD'
+      if (this.difficultyOption == 'Dificil') {
+        this.difficultyOptionFinal = 'HARD';
       }
+    }
+  }
+
+  fillGameOptions() {
+    this.apiConsumer.fetchAllGames().subscribe(
+      (games: GamesInterface[]) => {
+        this.gamesOptions = games;
+      },
+      (error) => {
+        console.error('Error fetching games:', error);
+        this.classOptions = [];
+      }
+    );
+  }
+
+  //-- Api consuptiom
+  generateRatioReport() {
+    if (
+      this.selectedClass &&
+      this.selectedClass.id !== undefined &&
+      this.selectedClass.id !== null &&
+      this.difficultyOption != null
+    ) {
+      this.apiConsumer
+        .getSuccesFailRatioByClassId(
+          this.selectedClass.id,
+          this.difficultyOptionFinal
+        )
+        .subscribe(
+          (sfr: BarChartsInterface | BarChartsInterface[]) => {
+            this.sfr = Array.isArray(sfr) ? sfr : [sfr];
+          },
+          (error) => {
+            console.error('Error fetching sfr:', error);
+            this.sfr = [];
+          }
+        );
+    }
+    if (
+      this.selectedUser &&
+      this.selectedUser.id !== undefined &&
+      this.selectedUser.id !== null &&
+      this.difficultyOption != null
+    ) {
+      this.apiConsumer
+        .getSuccesFailRatioByUserId(this.selectedUser.id, this.difficultyOptionFinal)
+        .subscribe(
+          (sfr: BarChartsInterface | BarChartsInterface[]) => {
+            this.sfr = Array.isArray(sfr) ? sfr : [sfr];
+          },
+          (error) => {
+            console.error('Error fetching sfr:', error);
+            this.sfr = [];
+          }
+        );
+    }
+  }
+
+  generateFailSuccessIndex() {
+    var userOrClass;
+    var failOrSuccess;
+
+    if (
+      this.selectedClass &&
+      this.selectedClass.id !== undefined &&
+      this.selectedClass.id !== null &&
+      this.difficultyOption !== null &&
+      this.gameOption !== null
+    ) {
+      userOrClass = 1;
+      if (this.failOrSuccessOption == this.failOrSuccessOptions[0]) {
+        failOrSuccess = 0;
+      } else {
+        failOrSuccess = 1;
+      }
+
+      this.apiConsumer
+        .getMostFailsOrSuccessByClassOrUser(
+          userOrClass,
+          failOrSuccess,
+          this.gameOption.id,
+          this.difficultyOptionFinal,
+          this.selectedClass.id
+        )
+        .subscribe(
+          (sfr: BarChartsInterface | BarChartsInterface[]) => {
+            this.sfr = Array.isArray(sfr) ? sfr : [sfr];
+          },
+          (error) => {
+            console.error('Error fetching sfr:', error);
+            this.sfr = [];
+          }
+        );
+    }
+
+    if (
+      this.selectedUser &&
+      this.selectedUser.id !== undefined &&
+      this.selectedUser.id !== null &&
+      this.difficultyOption !== null &&
+      this.gameOption !== null
+    ) {
+      userOrClass = 0;
+      if (this.failOrSuccessOption == this.failOrSuccessOptions[0]) {
+        failOrSuccess = 0;
+      } else {
+        failOrSuccess = 1;
+      }
+
+      this.apiConsumer
+        .getMostFailsOrSuccessByClassOrUser(
+          userOrClass,
+          failOrSuccess,
+          this.gameOption.id,
+          this.difficultyOptionFinal,
+          this.selectedUser.id
+        )
+        .subscribe(
+          (sfr: BarChartsInterface | BarChartsInterface[]) => {
+            this.sfr = Array.isArray(sfr) ? sfr : [sfr];
+          },
+          (error) => {
+            console.error('Error fetching sfr:', error);
+            this.sfr = [];
+          }
+        );
+    }
+  }
+
+  generateElapsedTimeByClassOrUser(){
+    var userOrClass;
+    if (
+      this.selectedClass &&
+      this.selectedClass.id !== undefined &&
+      this.selectedClass.id !== null &&
+      this.difficultyOption !== null
+    ){
+      userOrClass = 1;
+      this.apiConsumer
+        .getElapsedTimeByClassOrUser(
+          userOrClass,          
+          this.difficultyOptionFinal,
+          this.selectedClass.id
+        )
+        .subscribe(
+          (sfr: BarChartsInterface | BarChartsInterface[]) => {
+            this.sfr = Array.isArray(sfr) ? sfr : [sfr];
+          },
+          (error) => {
+            console.error('Error fetching sfr:', error);
+            this.sfr = [];
+          }
+        );
+    }
+    if (
+      this.selectedUser &&
+      this.selectedUser.id !== undefined &&
+      this.selectedUser.id !== null &&
+      this.difficultyOption !== null
+    ){
+      userOrClass = 0;
+      this.apiConsumer
+        .getElapsedTimeByClassOrUser(
+          userOrClass,          
+          this.difficultyOptionFinal,
+          this.selectedUser.id
+        )
+        .subscribe(
+          (sfr: BarChartsInterface | BarChartsInterface[]) => {
+            this.sfr = Array.isArray(sfr) ? sfr : [sfr];
+          },
+          (error) => {
+            console.error('Error fetching sfr:', error);
+            this.sfr = [];
+          }
+        );
     }
   }
 }

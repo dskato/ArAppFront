@@ -29,6 +29,40 @@
           </option>
         </select>
 
+        <div class="class-opt-cont" *ngIf="vvGameList">
+          <label for="game-select" class="lbl-conf">Juego:</label>
+          <select
+            class="select-conf"
+            name="game-select"
+            id="game-select"
+            [(ngModel)]="gameOption"
+          >
+            <option
+              *ngFor="let gameItem of gamesOptions"
+              [ngValue]="gameItem"
+            >
+              {{ gameItem.gameName +" - "+ gameItem.model }}
+            </option>
+          </select>
+        </div>
+
+        <div class="class-opt-cont" *ngIf="vvFoS">
+          <label for="aof-select" class="lbl-conf">Acierto o Fallo:</label>
+          <select
+            class="select-conf"
+            name="aof-select"
+            id="aof-select"
+            [(ngModel)]="failOrSuccessOption"
+          >
+            <option
+              *ngFor="let fos of failOrSuccessOptions"
+              [ngValue]="fos"
+            >
+              {{ fos }}
+            </option>
+          </select>
+        </div>
+
         <label for="difficulty" class="lbl-conf">Dificultad:</label>
         <select
           class="select-conf"
@@ -40,6 +74,7 @@
             {{ difficulty }}
           </option>
         </select>
+
 
         <div class="class-opt-cont" *ngIf="vvIsFilterByClass">
           <label for="search-box-fr" class="lbl-conf">Buscar clase</label>

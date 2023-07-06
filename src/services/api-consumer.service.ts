@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
 //--- Interfaces
 import { SFRResponse } from 'src/Interfaces/SFRResponse';
 import { HttpClient } from '@angular/common/http';
@@ -6,6 +7,7 @@ import { ApiHandlerService } from './api-handler.service';
 import { UserItem } from 'src/Interfaces/UserItem';
 import { ClassItem } from 'src/Interfaces/ClassItem';
 import { BarChartsInterface } from 'src/Interfaces/BarChartsInterface';
+import { GamesInterface } from 'src/Interfaces/GamesInterface';
 
 @Injectable({
   providedIn: 'root',
@@ -23,137 +25,142 @@ export class ApiConsumerService {
     private apiHandler: ApiHandlerService
   ) {}
 
+
+  //-- Games
+  fetchAllGames(): Observable<GamesInterface[]> 
+  {
+    return this.http
+      .get<SFRResponse>(
+        this.globalUrl +
+          '/get-getallgames/'
+      )
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error fetching games:', error);
+          return of([]);
+        })
+      );
+  }
+
   //-- User, Class search by txt term
-  fetchUsersByTxt(searchTextUser: string): UserItem[] {
-    this.http
+
+  fetchUsersByTxt(searchTextUser: string): Observable<UserItem[]> 
+  {
+    return this.http
       .get<SFRResponse>(
         this.globalUrl +
           '/get-GetAllUsersByTextSearch/' +
           encodeURIComponent(searchTextUser)
       )
-      .subscribe(
-        (response: SFRResponse) => {
-          this.userOptions = this.userOptions.concat(response.data);
-        },
-        (error) => {
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
           console.error('Error fetching users:', error);
-        }
+          return of([]);
+        })
       );
-    return this.userOptions;
   }
 
-  fetchClasessByTxt(searchTextClass: string): ClassItem[] {
-    this.http
+  fetchClasessByTxt(searchTextClass: string): Observable<ClassItem[]> 
+  {
+    return this.http
       .get<SFRResponse>(
         this.globalUrl +
           '/get-GetAllClassesByTextSearch/' +
           encodeURIComponent(searchTextClass)
       )
-      .subscribe(
-        (response: SFRResponse) => {
-          this.classOptions = this.classOptions.concat(response.data);
-        },
-        (error) => {
-          console.error('Error fetching clasess:', error);
-        }
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error fetching classes:', error);
+          return of([]);
+        })
       );
-    return this.classOptions;
   }
 
   //-- Success Fail Ratios
-  getSuccesFailRatioByClassId(
-    classId: number,
-    difficulty: string
-  ): BarChartsInterface[] {
-    var params =
-      encodeURIComponent(classId) + '/' + encodeURIComponent(difficulty);
-    this.http
+  getSuccesFailRatioByClassId(classId: number, difficulty: string): Observable<any> 
+  {  
+    var params = encodeURIComponent(classId) + '/' + encodeURIComponent(difficulty);
+    return this.http
       .get<SFRResponse>(this.globalUrl + '/get-rsfbyclassid/' + params)
-      .subscribe(
-        (response: SFRResponse) => {
-          this.sfr = [];
-          this.sfr = this.sfr.concat(response.data);
-        },
-        (error) => {
-          console.error('Error fetching sfr:', error);
-        }
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error fetching rsfbyclassid:', error);
+          return of([]);
+        })
       );
-    return this.sfr;
   }
 
-  getSuccesFailRatioByUserId(
-    userId: number,
-    difficulty: string
-  ): BarChartsInterface[] {
-    var params =
-      encodeURIComponent(userId) + '/' + encodeURIComponent(difficulty);
-    this.http
+  getSuccesFailRatioByUserId(userId: number, difficulty: string): Observable<any> 
+  {
+    var params = encodeURIComponent(userId) + '/' + encodeURIComponent(difficulty);
+    return this.http
       .get<SFRResponse>(this.globalUrl + '/get-rsfbyuserid/' + params)
-      .subscribe(
-        (response: SFRResponse) => {
-          this.sfr = [];
-          this.sfr = this.sfr.concat(response.data);
-        },
-        (error) => {
-          console.error('Error fetching sfr:', error);
-        }
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error fetching rsfbyuserid:', error);
+          return of([]);
+        })
       );
-    return this.sfr;
   }
+
 
   //-- Most fail or success
   //1 CLASS
   //0 USER
   //1 FAIL
   //0 SUCCESS
-  getMostFailsOrSuccessByClassOrUser(
-    userOrClass: number,
-    failOrSuccess: number,
-    difficulty: string,
-    userOrClassId: number
-  ): BarChartsInterface[] {
+  getMostFailsOrSuccessByClassOrUser( userOrClass: number,failOrSuccess: number, gameId: number, difficulty: string, userOrClassId: number): 
+  Observable<BarChartsInterface[]> 
+  {  
     var params =
       encodeURIComponent(userOrClass) +
       '/' +
       encodeURIComponent(failOrSuccess) +
       '/' +
+      encodeURIComponent(gameId) +
+      '/' +
       encodeURIComponent(difficulty) +
       '/' +
       encodeURIComponent(userOrClassId);
-    this.http
+
+    return this.http
       .get<SFRResponse>(this.globalUrl + '/get-GetMostFailsOrSuccessByClassOrUser/' + params)
-      .subscribe(
-        (response: SFRResponse) => {
-          this.sfr = [];
-          this.sfr = this.sfr.concat(response.data);
-        },
-        (error) => {
-          console.error('Error fetching sfr:', error);
-        }
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error fetching GetMostFailsOrSuccessByClassOrUser:', error);
+          return of([]);
+        })
       );
-    return this.sfr;
   }
+
 
   //1 CLASS
   //0 USER
-  getElapsedTimeByClassOrUser(userOrClass: number, difficulty: string, userOrClassId:number): BarChartsInterface[] {
+  getElapsedTimeByClassOrUser( userOrClass: number,difficulty: string, userOrClassId: number): 
+  Observable<BarChartsInterface[]> 
+  {  
     var params =
       encodeURIComponent(userOrClass) +
       '/' +
       encodeURIComponent(difficulty) +
       '/' +
       encodeURIComponent(userOrClassId);
-    this.http
+
+    return this.http
       .get<SFRResponse>(this.globalUrl + '/get-ElapsedTimeByClassOrUser/' + params)
-      .subscribe(
-        (response: SFRResponse) => {
-          this.sfr = [];
-          this.sfr = this.sfr.concat(response.data);
-        },
-        (error) => {
-          console.error('Error fetching sfr:', error);
-        }
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error fetching ElapsedTimeByClassOrUser:', error);
+          return of([]);
+        })
       );
-    return this.sfr;
   }
+  
 }
