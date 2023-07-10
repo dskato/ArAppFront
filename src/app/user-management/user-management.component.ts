@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ApiHandlerService } from 'src/services/api-handler.service';
 import { ToastrService } from 'ngx-toastr';
+import { ApiConsumerService } from 'src/services/api-consumer.service';
 
 export interface UserListResponse {
   code: number;
@@ -32,7 +33,8 @@ export class UserManagementComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private apiHandler: ApiHandlerService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private apiConsumer: ApiConsumerService
   ) {}
 
   globalUrl = this.apiHandler.apiUrl;
@@ -44,7 +46,9 @@ export class UserManagementComponent implements OnInit {
 
   fetchUsers(): void {
     this.http
-      .get<UserListResponse>(this.globalUrl + '/get-getallusers')
+      .get<UserListResponse>(this.globalUrl + '/get-getallusers', {
+        headers: this.apiConsumer.getHeaders()
+      })
       .subscribe(
         (response: UserListResponse) => {
           this.users = response.data.map((user: UserData) => ({
@@ -97,7 +101,9 @@ export class UserManagementComponent implements OnInit {
     formData.append('userId', user.id.toString());
     formData.append('isUserActive', status.toString());
     this.http
-      .post(this.apiHandler.apiUrl + '/post-changestatus', formData)
+      .post(this.apiHandler.apiUrl + '/post-changestatus', formData, {
+        headers: this.apiConsumer.getHeaders()
+      })
       .subscribe(
         (response) => {
           console.log(response);
@@ -132,7 +138,9 @@ export class UserManagementComponent implements OnInit {
     formData.append('role', user.role);
 
     this.http
-      .post(this.apiHandler.apiUrl + '/post-updateuser', formData)
+      .post(this.apiHandler.apiUrl + '/post-updateuser', formData, {
+        headers: this.apiConsumer.getHeaders()
+      })
       .subscribe(
         (response) => {
           console.log(response);

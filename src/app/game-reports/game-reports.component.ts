@@ -23,7 +23,7 @@ export class GameReportsComponent implements OnInit {
     'Ratio entre aciertos y fallos en los intentos de cada juego por clase y alumno',
     'Juego con el índice más alto de aciertos o fallos por clase y alumno',
     'Tiempo empleado en finalizar el juego por clase y alumno',
-    'Ranking en base de tiempo empleado de alumnos por juego y aula',
+    'Ranking en base al tiempo, puntaje, fallos y aciertos',
   ];
   sReportOption!: string;
 
@@ -75,7 +75,7 @@ export class GameReportsComponent implements OnInit {
   yAxisLabel: string = 'Ratio Aciertos Fallos';
   legendTitle: string = '';
   timeline: boolean = true;
-  view: [number, number] = [800, 480];
+  view: [number, number] = [900, 500];
   colorScheme: Color = {
     domain: ['#151515', '#fe5115'],
     group: ScaleType.Ordinal,
@@ -131,21 +131,27 @@ export class GameReportsComponent implements OnInit {
       this.vvGameList = false;
       this.vvFoS = false;
     }
-    if (
-      this.sReportOption == this.reportOptions[1] 
-    ) {
+    if (this.sReportOption == this.reportOptions[1]) {
       //--
       this.fillGameOptions();
       this.vvFailRatioCont = true;
       this.vvGameList = true;
       this.vvFoS = true;
     }
+    if (this.sReportOption == this.reportOptions[2]) {
+      //--
+      this.fillGameOptions();
+      this.vvFailRatioCont = true;
+      this.vvGameList = false;
+      this.vvFoS = false;
+    }
   }
 
   validateGenerateButtonVisibility() {
     if (
       this.sReportOption == this.reportOptions[0] ||
-      this.sReportOption == this.reportOptions[2]
+      this.sReportOption == this.reportOptions[2] ||
+      this.sReportOption == this.reportOptions[3]
     ) {
       if (this.vvIsFilterByClass == true) {
         if (this.selectedClass == null || this.difficultyOption.trim() === '') {
@@ -162,14 +168,14 @@ export class GameReportsComponent implements OnInit {
         }
       }
     }
-    if (
-      this.sReportOption == this.reportOptions[1] 
-    ) {
+    if (this.sReportOption == this.reportOptions[1]) {
       if (this.vvIsFilterByClass == true) {
         if (
           this.selectedClass == null ||
           this.difficultyOption.trim() === '' ||
           this.gameOption == null ||
+          this.gameOption.id == null ||
+          this.gameOption.id == undefined ||
           this.failOrSuccessOption == null
         ) {
           this.vvButtonGenerateReport = false;
@@ -182,6 +188,8 @@ export class GameReportsComponent implements OnInit {
           this.selectedUser == null ||
           this.difficultyOption.trim() === '' ||
           this.gameOption == null ||
+          this.gameOption.id == null ||
+          this.gameOption.id == undefined ||
           this.failOrSuccessOption == null
         ) {
           this.vvButtonGenerateReport = false;
@@ -241,12 +249,13 @@ export class GameReportsComponent implements OnInit {
     if (this.sReportOption == this.reportOptions[0]) {
       this.generateRatioReport();
     }
-    if (
-      this.sReportOption == this.reportOptions[1] 
-    ) {
+    if (this.sReportOption == this.reportOptions[1]) {
       this.generateFailSuccessIndex();
     }
     if (this.sReportOption == this.reportOptions[2]) {
+      this.generateElapsedTimeByClassOrUser();
+    }
+    if (this.sReportOption == this.reportOptions[3]) {
       this.generateElapsedTimeByClassOrUser();
     }
   }
@@ -321,7 +330,10 @@ export class GameReportsComponent implements OnInit {
       this.difficultyOption != null
     ) {
       this.apiConsumer
-        .getSuccesFailRatioByUserId(this.selectedUser.id, this.difficultyOptionFinal)
+        .getSuccesFailRatioByUserId(
+          this.selectedUser.id,
+          this.difficultyOptionFinal
+        )
         .subscribe(
           (sfr: BarChartsInterface | BarChartsInterface[]) => {
             this.sfr = Array.isArray(sfr) ? sfr : [sfr];
@@ -405,18 +417,18 @@ export class GameReportsComponent implements OnInit {
     }
   }
 
-  generateElapsedTimeByClassOrUser(){
+  generateElapsedTimeByClassOrUser() {
     var userOrClass;
     if (
       this.selectedClass &&
       this.selectedClass.id !== undefined &&
       this.selectedClass.id !== null &&
       this.difficultyOption !== null
-    ){
+    ) {
       userOrClass = 1;
       this.apiConsumer
         .getElapsedTimeByClassOrUser(
-          userOrClass,          
+          userOrClass,
           this.difficultyOptionFinal,
           this.selectedClass.id
         )
@@ -435,11 +447,65 @@ export class GameReportsComponent implements OnInit {
       this.selectedUser.id !== undefined &&
       this.selectedUser.id !== null &&
       this.difficultyOption !== null
-    ){
+    ) {
       userOrClass = 0;
       this.apiConsumer
         .getElapsedTimeByClassOrUser(
-          userOrClass,          
+          userOrClass,
+          this.difficultyOptionFinal,
+          this.selectedUser.id
+        )
+        .subscribe(
+          (sfr: BarChartsInterface | BarChartsInterface[]) => {
+            this.sfr = Array.isArray(sfr) ? sfr : [sfr];
+          },
+          (error) => {
+            console.error('Error fetching sfr:', error);
+            this.sfr = [];
+          }
+        );
+    }
+  }
+
+  generateGeneralRanking() {
+    var userOrClass;
+    if (
+      this.selectedClass &&
+      this.selectedClass.id !== undefined &&
+      this.selectedClass.id !== null &&
+      this.gameOption.id !== null &&
+      this.difficultyOption !== null
+    ) {
+      userOrClass = 1;
+      this.apiConsumer
+        .GeneralRanking(
+          userOrClass,
+          this.gameOption.id,
+          this.difficultyOptionFinal,
+          this.selectedClass.id
+        )
+        .subscribe(
+          (sfr: BarChartsInterface | BarChartsInterface[]) => {
+            this.sfr = Array.isArray(sfr) ? sfr : [sfr];
+          },
+          (error) => {
+            console.error('Error fetching sfr:', error);
+            this.sfr = [];
+          }
+        );
+    }
+    if (
+      this.selectedUser &&
+      this.selectedUser.id !== undefined &&
+      this.selectedUser.id !== null &&
+      this.gameOption.id !== null &&
+      this.difficultyOption !== null
+    ) {
+      userOrClass = 0;
+      this.apiConsumer
+        .GeneralRanking(
+          userOrClass,
+          this.gameOption.id,
           this.difficultyOptionFinal,
           this.selectedUser.id
         )
