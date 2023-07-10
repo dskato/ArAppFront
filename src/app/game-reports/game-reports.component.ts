@@ -27,7 +27,7 @@ export class GameReportsComponent implements OnInit {
   ];
   sReportOption!: string;
 
-  //f-r form
+  //f-r form -
   searchTextClass!: string;
   searchTextUser!: string;
   classOptions: ClassItem[] = [];
