@@ -23,10 +23,7 @@ export interface LoginResponse {
   templateUrl: './log-in.component.html',
   styleUrls: ['./log-in.component.css'],
 })
-
 export class LogInComponent implements OnInit {
-
-  
   globalUrl = this.apiHandler.apiUrl;
   email!: string;
   password!: string;
@@ -52,21 +49,28 @@ export class LogInComponent implements OnInit {
 
   login() {
     if (!this.email || !this.password) {
-      this.toastr.info('Please fill out all required fields.');
+      this.toastr.info('Debe llenar todos los campos requerios.');
       return;
     }
 
     this.validateUser(this.email, this.password).subscribe(
       (response) => {
-        const loginResponse = response as LoginResponse; 
-        const token = loginResponse.data.token; 
+        const loginResponse = response as LoginResponse;
+        const token = loginResponse.data.token;
         this.tokenService.setToken(token);
-        this.router.navigate(['/home']);
-        this.toastr.success('User signed successfully.');
+        if (this.tokenService.getRole() == 'STUDENT') {
+          this.toastr.error(
+            'Solo los maestros o administradores pueden iniciar sesion.'
+          );
+          this.tokenService.removeToken();
+        } else {
+          this.router.navigate(['/home']);
+          this.toastr.success('Inicio de sesion satisfactorio.');
+        }
       },
       (error) => {
-        this.toastr.error('Incorrect email or password.');
-        console.error('Incorrect email or password:', error);
+        this.toastr.error('Clave o Correo incorrecto.');
+        console.error('Clave o Correo incorrecto: ', error);
       }
     );
   }
@@ -80,8 +84,7 @@ export class LogInComponent implements OnInit {
     this.router.navigate(['/register'], { queryParams: { role: role } });
   }
 
-  restorePassword(): void{
+  restorePassword(): void {
     this.router.navigate(['/restore-password']);
-
   }
 }

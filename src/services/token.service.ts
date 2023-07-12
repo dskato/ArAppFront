@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import jwtDecode from 'jwt-decode'
+import { TokenInterface } from 'src/Interfaces/TokenInterface';
+
 
 @Injectable({
   providedIn: 'root',
@@ -51,16 +54,20 @@ export class TokenService {
     return true;
   }
 
-  redirectIfNotValid(page : string): void {
+  redirectIfNotValid(page: string): void {
     if (!this.isTokenValid()) {
       this.removeToken();
       this.router.navigate([page]);
     }
   }
 
-  redirectIfValid(page : string): void {
+  redirectIfValid(page: string): void {
     if (this.isTokenValid()) {
       this.router.navigate([page]);
     }
+  }
+
+  getRole(): string {
+    return jwtDecode<TokenInterface>(this.getToken()).role;
   }
 }

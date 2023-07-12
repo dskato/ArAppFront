@@ -37,11 +37,8 @@
             id="game-select"
             [(ngModel)]="gameOption"
           >
-            <option
-              *ngFor="let gameItem of gamesOptions"
-              [ngValue]="gameItem"
-            >
-              {{ gameItem.gameName +" - "+ gameItem.model }}
+            <option *ngFor="let gameItem of gamesOptions" [ngValue]="gameItem">
+              {{ gameItem.gameName + " - " + gameItem.model }}
             </option>
           </select>
         </div>
@@ -54,10 +51,7 @@
             id="aof-select"
             [(ngModel)]="failOrSuccessOption"
           >
-            <option
-              *ngFor="let fos of failOrSuccessOptions"
-              [ngValue]="fos"
-            >
+            <option *ngFor="let fos of failOrSuccessOptions" [ngValue]="fos">
               {{ fos }}
             </option>
           </select>
@@ -70,11 +64,13 @@
           id="difficulty-select"
           [(ngModel)]="difficultyOption"
         >
-          <option *ngFor="let difficulty of difficultyOptions" [value]="difficulty">
+          <option
+            *ngFor="let difficulty of difficultyOptions"
+            [value]="difficulty"
+          >
             {{ difficulty }}
           </option>
         </select>
-
 
         <div class="class-opt-cont" *ngIf="vvIsFilterByClass">
           <label for="search-box-fr" class="lbl-conf">Buscar clase</label>
@@ -150,10 +146,13 @@
         >
           Generar Reporte
         </button>
+        <p class="lbl-conf" id="lbl-information" *ngIf="vvButtonGenerateReport" [innerHTML]="reportInformation">
+          {{ reportInformation }}
+        </p>
       </div>
     </div>
 
-    <div class="graphic-cont">
+    <div class="graphic-cont" id="graphic-cont">
       <div class="graph" id="g1" *ngIf="vvBarVertical2d">
         <ngx-charts-bar-vertical-2d
           [view]="view"
@@ -233,4 +232,3 @@
     </div>
   </div>
 </div>
-

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, Renderer2 } from '@angular/core';
 import { Color, ScaleType } from '@swimlane/ngx-charts';
 import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 //-- Interfaces
 import { ClassItem } from 'src/Interfaces/ClassItem';
 import { UserItem } from 'src/Interfaces/UserItem';
@@ -71,11 +72,11 @@ export class GameReportsComponent implements OnInit {
   showLegend: boolean = true;
   showXAxisLabel: boolean = true;
   xAxisLabel: string = '';
+  yAxisLabel: string = '';
   showYAxisLabel: boolean = true;
-  yAxisLabel: string = 'Ratio Aciertos Fallos';
   legendTitle: string = '';
   timeline: boolean = true;
-  view: [number, number] = [900, 500];
+  view: [number, number]= [1200, 670]; //W H
   colorScheme: Color = {
     domain: ['#151515', '#fe5115'],
     group: ScaleType.Ordinal,
@@ -83,13 +84,26 @@ export class GameReportsComponent implements OnInit {
     name: 'Customer Usage',
   };
   sfr: BarChartsInterface[] = [];
+  reportInformation!: string;
 
-  ngOnInit(): void {}
+  //View size
+
+  ngOnInit(): void {
+    this.changeXYAxis();
+  }
+
+  getSize() {
+    const divElement = this.elementRef.nativeElement.querySelector('#graphic-cont');
+    const width = divElement.offsetWidth;
+    const height = divElement.offsetHeight;
+    console.log('H: '+ height +' '+ 'W: '+width)
+    //this.view = [width-50, height-100];
+  }
 
   constructor(
     private http: HttpClient,
     private apiHandler: ApiHandlerService,
-    private apiConsumer: ApiConsumerService
+    private apiConsumer: ApiConsumerService, private elementRef: ElementRef, private renderer: Renderer2,private sanitizer: DomSanitizer
   ) {
     //Object.assign(this, { this.sfr });
   }
@@ -130,6 +144,7 @@ export class GameReportsComponent implements OnInit {
       this.vvFailRatioCont = true;
       this.vvGameList = false;
       this.vvFoS = false;
+      this.reportInformation = '<br>Formula usada: <br><br>((Suma de intentos exitosos) / (Suma de intentos exitosos + Suma de intentos fallidos)) * 100';
     }
     if (this.sReportOption == this.reportOptions[1]) {
       //--
@@ -137,6 +152,7 @@ export class GameReportsComponent implements OnInit {
       this.vvFailRatioCont = true;
       this.vvGameList = true;
       this.vvFoS = true;
+      this.reportInformation = '<br>Formula usada: <br><br>Sumatoria de los aciertos o fallos.';
     }
     if (this.sReportOption == this.reportOptions[2]) {
       //--
@@ -144,6 +160,10 @@ export class GameReportsComponent implements OnInit {
       this.vvFailRatioCont = true;
       this.vvGameList = false;
       this.vvFoS = false;
+      this.reportInformation = '<br>Formula usada: <br><br>Sumatoria del tiempo empleado en cada intento.';
+    }
+    if (this.sReportOption == this.reportOptions[3]) {
+      this.reportInformation = '<br>Peso de los valores:<br><br>Peso del tiempo 30%. <br>Peso intentos fallidos 10%. <br>Peso del puntaje 40%. <br>Peso intentos satisfactorios 20%.<br><br>Formula usada:<br><br>((0.4 * Puntaje) + (Peso del Tiempo) + (0.2 * (Intento Satisfactorio)) + (Peso de las fallas)) ';
     }
   }
 
@@ -205,6 +225,7 @@ export class GameReportsComponent implements OnInit {
     this.sfr = [];
     this.selectedClass = {} as ClassItem;
     this.selectedUser = {} as UserItem;
+    this.changeXYAxis();
 
     if (this.reportByOption == this.filterOption[0]) {
       //Filter by class
@@ -219,23 +240,18 @@ export class GameReportsComponent implements OnInit {
 
   changeChart() {
     this.setAllChartsInvisible();
+    this.changeXYAxis();
     if (this.selectedTypeOfChart == this.typeOfChartOption[0]) {
       // Barras verticales
       this.vvBarVertical2d = true;
-      this.xAxisLabel = 'Clase';
-      this.legendTitle = 'Estudiantes';
     }
     if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
       // Barras horizontales
       this.vvBarHorizontalStacked = true;
-      this.xAxisLabel = 'Estudiante';
-      this.legendTitle = 'Clases';
     }
     if (this.selectedTypeOfChart == this.typeOfChartOption[2]) {
       // Area de Barras
       this.vvBarArea = true;
-      this.xAxisLabel = 'Estudiantes';
-      this.legendTitle = 'Clases';
     }
     if (this.selectedTypeOfChart == this.typeOfChartOption[3]) {
       // Area de Lineas
@@ -256,7 +272,7 @@ export class GameReportsComponent implements OnInit {
       this.generateElapsedTimeByClassOrUser();
     }
     if (this.sReportOption == this.reportOptions[3]) {
-      this.generateElapsedTimeByClassOrUser();
+      this.generateGeneralRanking();
     }
   }
 
@@ -518,6 +534,86 @@ export class GameReportsComponent implements OnInit {
             this.sfr = [];
           }
         );
+    }
+  }
+
+  //X and Y Axis
+  changeXYAxis() {
+    if (this.sReportOption == this.reportOptions[0]) {
+      if (this.filterOption[0] == this.reportByOption) {
+        this.xAxisLabel = 'Estudiantes';
+        this.legendTitle = 'Estudiantes';
+        this.yAxisLabel = 'Ratio Aciertos y Fallos';
+        if(this.selectedTypeOfChart == this.typeOfChartOption[1]){
+          this.yAxisLabel = 'Estudiantes';
+          this.xAxisLabel = 'Ratio Aciertos y Fallos';
+        }
+      } else if(this.filterOption[0] != this.reportByOption) {
+        this.xAxisLabel = 'Estudiantes';
+        this.legendTitle = 'Clases';
+        this.yAxisLabel = 'Ratio Aciertos y Fallos';
+        if(this.selectedTypeOfChart == this.typeOfChartOption[1]){
+          this.yAxisLabel = 'Estudiantes';
+          this.xAxisLabel = 'Ratio Aciertos y Fallos';
+        }
+      }
+    }
+    if (this.sReportOption == this.reportOptions[1]) {
+      if (this.filterOption[0] == this.reportByOption) {
+        this.xAxisLabel = 'Estudiantes';
+        this.legendTitle = 'Estudiantes';
+        this.yAxisLabel = 'Indice de '+ this.failOrSuccessOption;
+        if(this.selectedTypeOfChart == this.typeOfChartOption[1]){
+          this.yAxisLabel = 'Estudiantes';
+          this.xAxisLabel = 'Indice de '+ this.failOrSuccessOption;
+        }
+      } else if(this.filterOption[0] != this.reportByOption) {
+        this.xAxisLabel = 'Estudiantes';
+        this.legendTitle = 'Clases';
+        this.yAxisLabel = 'Indice de '+ this.failOrSuccessOption;
+        if(this.selectedTypeOfChart == this.typeOfChartOption[1]){
+          this.yAxisLabel = 'Estudiantes';
+          this.xAxisLabel = 'Indice de '+ this.failOrSuccessOption;
+        }
+      }
+    }
+    if (this.sReportOption == this.reportOptions[2]) {
+      if (this.filterOption[0] == this.reportByOption) {
+        this.xAxisLabel = 'Estudiantes';
+        this.legendTitle = 'Estudiantes';
+        this.yAxisLabel = 'Tiempo Empleado';
+        if(this.selectedTypeOfChart == this.typeOfChartOption[1]){
+          this.yAxisLabel = 'Estudiantes';
+          this.xAxisLabel = 'Tiempo Empleado'
+        }
+      } else if(this.filterOption[0] != this.reportByOption) {
+        this.xAxisLabel = 'Estudiantes';
+        this.legendTitle = 'Clases';
+        this.yAxisLabel = 'Tiempo Empleado'
+        if(this.selectedTypeOfChart == this.typeOfChartOption[1]){
+          this.yAxisLabel = 'Estudiantes';
+          this.xAxisLabel = 'Tiempo Empleado';
+        }
+      }
+    }
+    if (this.sReportOption == this.reportOptions[3]) {
+      if (this.filterOption[0] == this.reportByOption) {
+        this.xAxisLabel = 'Estudiantes';
+        this.legendTitle = 'Estudiantes';
+        this.yAxisLabel = 'Ranking General';
+        if(this.selectedTypeOfChart == this.typeOfChartOption[1]){
+          this.yAxisLabel = 'Estudiantes';
+          this.xAxisLabel = 'Ranking General'
+        }
+      } else if(this.filterOption[0] != this.reportByOption) {
+        this.xAxisLabel = 'Estudiantes';
+        this.legendTitle = 'Clases';
+        this.yAxisLabel = 'Ranking General'
+        if(this.selectedTypeOfChart == this.typeOfChartOption[1]){
+          this.yAxisLabel = 'Estudiantes';
+          this.xAxisLabel = 'Ranking General';
+        }
+      }
     }
   }
 }
