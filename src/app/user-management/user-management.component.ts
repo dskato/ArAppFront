@@ -3,6 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { ApiHandlerService } from 'src/services/api-handler.service';
 import { ToastrService } from 'ngx-toastr';
 import { ApiConsumerService } from 'src/services/api-consumer.service';
+//-- Interfaces
+import { TokenInterface } from 'src/Interfaces/TokenInterface';
+//-- Services
+import { TokenService } from 'src/services/token.service';
 
 export interface UserListResponse {
   code: number;
@@ -34,11 +38,13 @@ export class UserManagementComponent implements OnInit {
     private http: HttpClient,
     private apiHandler: ApiHandlerService,
     private toastr: ToastrService,
-    private apiConsumer: ApiConsumerService
+    private apiConsumer: ApiConsumerService,
+    private tokenService: TokenService
   ) {}
 
   globalUrl = this.apiHandler.apiUrl;
   users: UserData[] = [];
+  token!: TokenInterface;
 
   ngOnInit(): void {
     this.fetchUsers();
@@ -128,6 +134,10 @@ export class UserManagementComponent implements OnInit {
   }
 
   editUser(user: UserData): void {
+    if(this.tokenService.getRole() == 'STUDENT'){
+      this.toastr.error('Solo administradores y profesores pueden cambiar roles.');
+      return; 
+    }
     this.toggleEditMode(user);
 
     const formData = new FormData();
@@ -145,11 +155,11 @@ export class UserManagementComponent implements OnInit {
         (response) => {
           console.log(response);
           console.log('User updated successfully');
-          this.toastr.success('User updated succesfully!');
+          this.toastr.success('Usuario actualizado!');
         },
         (error) => {
           console.log('Error updating user:', error);
-          this.toastr.error('Error updating user.');
+          this.toastr.error('Error actualizando usuario.');
         }
       );
   }
