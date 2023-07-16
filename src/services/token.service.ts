@@ -70,4 +70,7 @@ export class TokenService {
   getRole(): string {
     return jwtDecode<TokenInterface>(this.getToken()).role;
   }
+  getUid(): string {
+    return jwtDecode<TokenInterface>(this.getToken()).uid;
+  }
 }

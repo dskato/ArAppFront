@@ -33,12 +33,11 @@ export class ApiConsumerService {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${this.tokenService.getToken()}`,
     });
-    console.log(headers);
     return headers;
   }
 
   //-- Games
-  fetchAllGames(): Observable<GamesInterface[]> {
+  fetchAllGames(): Observable<any>{
     return this.http
       .get<SFRResponse>(this.globalUrl + '/get-getallgames/', {
         headers: this.getHeaders(),
@@ -58,7 +57,7 @@ export class ApiConsumerService {
     return this.http
       .get<SFRResponse>(
         this.globalUrl +
-          '/get-GetAllUsersByTextSearch/' +
+          '/get-GetAllUsersByTextSearch/' +encodeURIComponent(this.tokenService.getUid())+'/'+
           encodeURIComponent(searchTextUser),
         {
           headers: this.getHeaders(),
@@ -77,7 +76,7 @@ export class ApiConsumerService {
     return this.http
       .get<SFRResponse>(
         this.globalUrl +
-          '/get-GetAllClassesByTextSearch/' +
+          '/get-GetAllClassesByTextSearch/' +encodeURIComponent(this.tokenService.getUid())+'/'+
           encodeURIComponent(searchTextClass),
         {
           headers: this.getHeaders(),
@@ -93,14 +92,17 @@ export class ApiConsumerService {
   }
 
   //-- Success Fail Ratios
-  getSuccesFailRatioByClassId(
+  getSuccesFailRatioByClassOrUserId(
+    isUser: boolean,
     classId: number,
     difficulty: string
   ): Observable<any> {
+    var resource = '';
     var params =
       encodeURIComponent(classId) + '/' + encodeURIComponent(difficulty);
+    isUser ?  resource = '/get-rsfbyuserid/' :  resource = '/get-rsfbyclassid/';
     return this.http
-      .get<SFRResponse>(this.globalUrl + '/get-rsfbyclassid/' + params, {
+      .get<SFRResponse>(this.globalUrl + resource + params, {
         headers: this.getHeaders(),
       })
       .pipe(
@@ -112,24 +114,7 @@ export class ApiConsumerService {
       );
   }
 
-  getSuccesFailRatioByUserId(
-    userId: number,
-    difficulty: string
-  ): Observable<any> {
-    var params =
-      encodeURIComponent(userId) + '/' + encodeURIComponent(difficulty);
-    return this.http
-      .get<SFRResponse>(this.globalUrl + '/get-rsfbyuserid/' + params, {
-        headers: this.getHeaders(),
-      })
-      .pipe(
-        map((response: SFRResponse) => response.data),
-        catchError((error) => {
-          console.error('Error fetching rsfbyuserid:', error);
-          return of([]);
-        })
-      );
-  }
+ 
 
   //-- Most fail or success
   //1 CLASS
@@ -142,7 +127,7 @@ export class ApiConsumerService {
     gameId: number,
     difficulty: string,
     userOrClassId: number
-  ): Observable<BarChartsInterface[]> {
+  ): Observable<any> {
     var params =
       encodeURIComponent(userOrClass) +
       '/' +
@@ -179,7 +164,7 @@ export class ApiConsumerService {
     userOrClass: number,
     difficulty: string,
     userOrClassId: number
-  ): Observable<BarChartsInterface[]> {
+  ): Observable<any> {
     var params =
       encodeURIComponent(userOrClass) +
       '/' +
@@ -210,7 +195,7 @@ export class ApiConsumerService {
     gameId: number,
     difficulty: string,
     userOrClassId: number
-  ): Observable<BarChartsInterface[]> {
+  ): Observable<any> {
     var params =
       encodeURIComponent(userOrClass) +
       '/' +

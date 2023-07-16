@@ -107,9 +107,7 @@ export class UserManagementComponent implements OnInit {
     formData.append('userId', user.id.toString());
     formData.append('isUserActive', status.toString());
     this.http
-      .post(this.apiHandler.apiUrl + '/post-changestatus', formData, {
-        headers: this.apiConsumer.getHeaders()
-      })
+      .post(this.apiHandler.apiUrl + '/post-changestatus', formData)
       .subscribe(
         (response) => {
           console.log(response);
@@ -148,9 +146,7 @@ export class UserManagementComponent implements OnInit {
     formData.append('role', user.role);
 
     this.http
-      .post(this.apiHandler.apiUrl + '/post-updateuser', formData, {
-        headers: this.apiConsumer.getHeaders()
-      })
+      .post(this.apiHandler.apiUrl + '/post-updateuser', formData)
       .subscribe(
         (response) => {
           console.log(response);
