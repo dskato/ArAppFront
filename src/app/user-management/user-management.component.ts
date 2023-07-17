@@ -71,9 +71,9 @@ export class UserManagementComponent implements OnInit {
 
   getIconStatusBackgroundColor(status: string): string {
     if (status === 'Active') {
-      return 'rgba(180, 2, 2, 0.418)';
+      return 'rgba(231, 82, 85)';
     } else if (status === 'Inactive' || status.trim() == '') {
-      return 'rgba(2, 180, 2, 0.418)';
+      return 'rgba(48, 187, 125)';
     } else {
       return '';
     }
@@ -81,9 +81,9 @@ export class UserManagementComponent implements OnInit {
 
   getStatusBackgroundColor(status: string): string {
     if (status === 'Active') {
-      return 'rgba(2, 180, 2, 0.418)';
+      return 'rgba(48, 187, 125)';
     } else if (status === 'Inactive') {
-      return 'rgba(180, 2, 2, 0.418)';
+      return 'rgba(231, 82, 85)';
     } else {
       return '';
     }

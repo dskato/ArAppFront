@@ -1,5 +1,5 @@
 .navbar {
-  background-color: #e9eaec !important;
+  background-color: #fafafa !important;
   color: #151515 !important;
   height: 10vh;
 }
@@ -10,11 +10,9 @@
   color: #151515 !important;
 }
 
-
-.body-container{
+.body-container {
   display: flex;
   flex-direction: row;
-
 }
 .sidebar {
   display: flex;
@@ -29,7 +27,7 @@
 .sidebar-design {
   width: 100%;
   height: 95%;
-  background-color: #e9eaec;
+  background-color: #fafafa;
   border-radius: 25px;
 }
 
@@ -51,19 +49,18 @@
   flex-direction: row;
   margin-top: 10%;
   text-decoration: none;
-  color: #151515 ;
-  
+  color: #151515;
 }
 .button-option:hover {
-  border-bottom: 2px solid #ff0000;
-  color: #ff0000;
+  border-bottom: 2px solid #00bff3;
+  color: #00bff3;
 }
-.clicked  {
-  border-bottom: 2px solid #ff0000;
-  color: #ff0000;
+.clicked {
+  border-bottom: 2px solid #00bff3;
+  color: #00bff3;
 }
 
-.module-container{
+.module-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -72,3 +69,17 @@
   padding: 1%;
 }
 
+.logout-cont {
+  display: flex;
+  flex-direction: row;
+  width: 8%;
+  height: fit-content;
+  justify-content: space-around;
+  align-items: center;
+}
+.logout-cont:hover{
+  color: #00bff3;
+}
+.txt-logout {
+  margin-top: 10%;
+}

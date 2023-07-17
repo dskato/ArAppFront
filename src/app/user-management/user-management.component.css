@@ -6,7 +6,7 @@
 
 .bbox {
   flex-grow: 1; /* Allow .bbox to grow and occupy available vertical space */
-  background-color: #e9eaec;
+  background-color: #fafafa;
   border-radius: 25px;
   display: flex;
   flex-direction: column;
@@ -78,14 +78,14 @@ h2 {
   border-radius: 25px;
 }
 #firstname-inpt:focus{
-  outline: 1px #fe5115 solid;
+  outline: 1px #00BFF3 solid;
 }
 #lastname-inpt.active {
   outline: 1px #1c1c1c solid;
   border-radius: 25px;
 }
 #lastname-inpt:focus{
-  outline: 1px #fe5115 solid;
+  outline: 1px #00BFF3 solid;
 }
 
 #actions-cont {
@@ -114,7 +114,7 @@ h2 {
   color: #1c1c1c;
 }
 .bi:hover {
-  color: #fe5115;
+  color: #00BFF3;
 }
 
 #role-select {
@@ -126,12 +126,12 @@ h2 {
   outline: 0.5px #1c1c1c solid;
 }
 #role-select:focus{
-  outline: 1px #fe5115 solid;
+  outline: 1px #00BFF3 solid;
 }
 
 #actions-cont i.active {
-  color: #fe5115;
+  color: #00BFF3;
 }
 .itemls-container.zebra-row {
-  background-color: #ffffff; /* Define the zebra color */
+  background-color: #e1e1e1; /* Define the zebra color */
 }

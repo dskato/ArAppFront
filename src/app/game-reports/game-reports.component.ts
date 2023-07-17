@@ -1,17 +1,17 @@
 import { Component, OnInit, ElementRef, Renderer2 } from '@angular/core';
 import { Color, ScaleType } from '@swimlane/ngx-charts';
-import { HttpClient } from '@angular/common/http';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, catchError, forkJoin, of, switchMap, tap } from 'rxjs';
 
 //-- Interfaces
 import { ClassItem } from 'src/Interfaces/ClassItem';
 import { UserItem } from 'src/Interfaces/UserItem';
 import { BarChartsInterface } from 'src/Interfaces/BarChartsInterface';
 import { GamesInterface } from 'src/Interfaces/GamesInterface';
+import { ChartsInterface } from 'src/Interfaces/ChartsInterface';
 //-- Services
 import { ApiHandlerService } from 'src/services/api-handler.service';
 import { ApiConsumerService } from 'src/services/api-consumer.service';
+import { TokenService } from 'src/services/token.service';
 
 @Component({
   selector: 'app-game-reports',
@@ -39,13 +39,7 @@ export class GameReportsComponent implements OnInit {
   selectedUser: UserItem = {} as UserItem;
   filterOption: string[] = ['Clase', 'Usuario'];
   reportByOption!: string;
-  selectedTypeOfChart!: string;
-  typeOfChartOption: string[] = [
-    'Barras Verticales',
-    'Barras Horizontales Apiladas',
-    'Area de Barras',
-    'Líneas de Barras',
-  ];
+
   difficultyOptionsReal: string[] = ['EASY', 'MEDIUM', 'HARD'];
   gamesOptions!: GamesInterface[];
   gameOption!: GamesInterface;
@@ -58,14 +52,16 @@ export class GameReportsComponent implements OnInit {
   vvButtonGenerateReport = false;
   vvGameList = false;
   vvFoS = false;
+  vvButtonShowGeneralInfo = false;
 
   //charts visibility variables
+  vvGeneralCharts = true;
   vvBarVertical2d = true;
-  vvBarHorizontalStacked = false;
+  vvBarHorizontalStacked = true;
   vvBarArea = false;
   vvBarLines = false;
 
-  // options
+  //VERTICAL, HORIZONTAL AND AREA CHARTS OPTIONS
   showXAxis: boolean = true;
   showYAxis: boolean = true;
   gradient: boolean = true;
@@ -76,22 +72,66 @@ export class GameReportsComponent implements OnInit {
   showYAxisLabel: boolean = true;
   legendTitle: string = '';
   timeline: boolean = true;
-  view: [number, number] = [1200, 670]; //W H
+  view!: [number, number]; //W H
   colorScheme: Color = {
-    domain: ['#151515', '#fe5115'],
+    domain: [
+      '#30BB7D',
+      '#E75255',
+      '#BEECFC',
+      '#202020',
+      '#00BFF3',
+      '#F7ACAE',
+      '#1f77b4',
+      '#ff7f0e',
+      '#2ca02c',
+      '#d62728',
+      '#9467bd',
+      '#8c564b',
+      '#e377c2',
+      '#7f7f7f',
+      '#bcbd22',
+      '#17becf',
+      '#aec7e8',
+      '#ffbb78',
+      '#98df8a',
+      '#ff9896',
+      '#c5b0d5',
+    ],
     group: ScaleType.Ordinal,
     selectable: true,
-    name: 'Customer Usage',
+    name: 'Generated Reports',
   };
+  //PIE, CARDS AND ANOTHER CHARTS
+  cardColor: string = '#AAAAAA';
+
   sfr: BarChartsInterface[] = [];
   observables: Observable<BarChartsInterface>[] = [];
   reportInformation!: string;
 
-  //View size
+  //GeneralReportData
+  //-- General Info
+  sfrOtherCharts: ChartsInterface[] = [];
+  observablesGI: Observable<ChartsInterface>[] = [];
+  //-- getTeacherStudentsFailOrSuccessCount
+  observablesF: Observable<ChartsInterface>[] = [];
+  observablesS: Observable<ChartsInterface>[] = [];
+  sfrFails: ChartsInterface[] = [];
+  sfrSuccess: ChartsInterface[] = [];
+  //-- getTeacherStudentsFailOrSuccessCount
+  observablesGC: Observable<ChartsInterface>[] = [];
+  sfrGameCount: ChartsInterface[] = [];
+  //-- GetTeacherStudentsGamesScores
+  observablesGS: Observable<ChartsInterface>[] = [];
+  sfrGameScore: ChartsInterface[] = [];
 
   ngOnInit(): void {
-    this.changeXYAxis();
-    this.getSize();
+    this.changeVerticalAndHorizontalBarsVisibility(false);
+    this.generateGeneralInfo().subscribe(() => {});
+    this.generateGameCounts().subscribe(() => {});
+    this.generateGameScores().subscribe(() => {});
+
+    this.generateTSFoS(1).subscribe(() => {});
+    this.generateTSFoS(0).subscribe(() => {});
   }
 
   getSize() {
@@ -115,15 +155,11 @@ export class GameReportsComponent implements OnInit {
   }
 
   constructor(
-    private http: HttpClient,
     private apiHandler: ApiHandlerService,
     private apiConsumer: ApiConsumerService,
     private elementRef: ElementRef,
-    private renderer: Renderer2,
-    private sanitizer: DomSanitizer
-  ) {
-    //Object.assign(this, { this.sfr });
-  }
+    private tokenService: TokenService
+  ) {}
 
   onSearchClassChange(): void {
     this.apiConsumer.fetchClasessByTxt(this.searchTextClass).subscribe(
@@ -150,10 +186,13 @@ export class GameReportsComponent implements OnInit {
   }
 
   validateOption(): void {
+    this.showGeneralReport();
+
     this.sfr = [];
     this.selectedClass = {} as ClassItem;
     this.selectedUser = {} as UserItem;
     this.gameOption = {} as GamesInterface;
+    this.failOrSuccessOption = {} as any;
     this.vvButtonGenerateReport = false;
 
     if (this.sReportOption == this.reportOptions[0]) {
@@ -242,11 +281,13 @@ export class GameReportsComponent implements OnInit {
   }
 
   validateReportByOption(): void {
+    this.validateGenerateButtonVisibility();
     this.vvButtonGenerateReport = false;
     this.sfr = [];
+    this.observables = [];
     this.selectedClass = {} as ClassItem;
     this.selectedUser = {} as UserItem;
-    this.changeXYAxis();
+    //this.changeXYAxis();
 
     if (this.reportByOption == this.filterOption[0]) {
       //Filter by class
@@ -259,28 +300,16 @@ export class GameReportsComponent implements OnInit {
     }
   }
 
-  changeChart() {
-    this.setAllChartsInvisible();
-    this.changeXYAxis();
-    if (this.selectedTypeOfChart == this.typeOfChartOption[0]) {
-      // Barras verticales
-      this.vvBarVertical2d = true;
-    }
-    if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-      // Barras horizontales
-      this.vvBarHorizontalStacked = true;
-    }
-    if (this.selectedTypeOfChart == this.typeOfChartOption[2]) {
-      // Area de Barras
-      this.vvBarArea = true;
-    }
-    if (this.selectedTypeOfChart == this.typeOfChartOption[3]) {
-      // Area de Lineas
-      this.vvBarLines = true;
-    }
+  showGeneralReport() {
+    this.vvButtonShowGeneralInfo = false;
+    this.vvGeneralCharts = true;
+    this.changeVerticalAndHorizontalBarsVisibility(false);
   }
-
   generateReportBarCharts() {
+    this.vvButtonShowGeneralInfo = true;
+    this.vvGeneralCharts = false;
+    this.changeVerticalAndHorizontalBarsVisibility(true);
+
     this.sfr = [];
     this.observables = [];
 
@@ -325,10 +354,112 @@ export class GameReportsComponent implements OnInit {
   }
 
   //-- Api consuptiom ----------------------------------------------------------------------------------------
+
+  generateGeneralInfo(): Observable<ChartsInterface[]> {
+    this.observablesGI = [];
+    this.sfrOtherCharts = [];
+
+    return this.apiConsumer.getGeneralInfo().pipe(
+      tap((response: ChartsInterface[]) => {
+        this.sfrOtherCharts = response;
+        this.sfrOtherCharts.forEach((chart) => {
+          const chartObservable = of(chart);
+          this.observablesGI.push(chartObservable);
+        });
+      }),
+      switchMap(() => this.joinReportListOtherCharts(this.observablesGI)),
+      catchError((error) => {
+        console.error('Error fetching sfrOtherCharts:', error);
+        this.sfrOtherCharts = [];
+        return of([]);
+      })
+    );
+  }
+
+  generateTSFoS(failOrSuccess: number): Observable<ChartsInterface[]> {
+    this.observablesF = [];
+    this.observablesS = [];
+    this.sfrFails = [];
+    this.sfrSuccess = [];
+
+    return this.apiConsumer
+      .getTeacherStudentsFailOrSuccessCount(failOrSuccess)
+      .pipe(
+        tap((response: ChartsInterface[]) => {
+          if (failOrSuccess == 1) {
+            this.sfrFails = response;
+            this.sfrFails.forEach((chart) => {
+              const chartObservable = of(chart);
+              this.observablesF.push(chartObservable);
+            });
+          } else {
+            this.sfrSuccess = response;
+            this.sfrSuccess.forEach((chart) => {
+              const chartObservable = of(chart);
+              this.observablesS.push(chartObservable);
+            });
+          }
+        }),
+        switchMap(() =>
+          this.joinReportListFoS(
+            failOrSuccess == 1 ? this.observablesF : this.observablesS,
+            failOrSuccess
+          )
+        ),
+        catchError((error) => {
+          console.error('Error fetching sfrFoS:', error);
+          failOrSuccess == 1 ? (this.sfrFails = []) : (this.sfrSuccess = []);
+          return of([]);
+        })
+      );
+  }
+
+  generateGameCounts(): Observable<ChartsInterface[]> {
+    this.observablesGC = [];
+    this.sfrGameCount = [];
+
+    return this.apiConsumer.getTeacherStudentsGamesPlayedCount().pipe(
+      tap((response: ChartsInterface[]) => {
+        this.sfrGameCount = response;
+        this.sfrGameCount.forEach((chart) => {
+          const chartObservable = of(chart);
+          this.observablesGC.push(chartObservable);
+        });
+      }),
+      switchMap(() => this.joinReportListGameCount(this.observablesGC)),
+      catchError((error) => {
+        console.error('Error fetching sfrGameCount:', error);
+        this.sfrGameCount = [];
+        return of([]);
+      })
+    );
+  }
+
+  generateGameScores(): Observable<ChartsInterface[]> {
+    this.observablesGS = [];
+    this.sfrGameScore = [];
+
+    return this.apiConsumer.getTeacherStudentsGamesPlayedCount().pipe(
+      tap((response: ChartsInterface[]) => {
+        this.sfrGameScore = response;
+        this.sfrGameScore.forEach((chart) => {
+          const chartObservable = of(chart);
+          this.observablesGS.push(chartObservable);
+        });
+      }),
+      switchMap(() => this.joinReportListGameScore(this.observablesGS)),
+      catchError((error) => {
+        console.error('Error fetching sfrGameScore:', error);
+        this.sfrGameCount = [];
+        return of([]);
+      })
+    );
+  }
+
   generateRatioReport() {
     var isUser = this.isUserSelected();
     var uocId = this.getUserOrClassId();
-    
+
     this.difficultyOptionsReal.forEach((option) => {
       const observable = this.apiConsumer.getSuccesFailRatioByClassOrUserId(
         isUser,
@@ -341,14 +472,15 @@ export class GameReportsComponent implements OnInit {
   }
 
   generateFailSuccessIndex() {
-    
     var userOrClass: any;
     var failOrSuccess: any;
     var isUser = this.isUserSelected();
     var uocId = this.getUserOrClassId();
 
-    isUser ? userOrClass = 0 : userOrClass = 1;
-    this.failOrSuccessOption == this.failOrSuccessOptions[0] ? failOrSuccess = 0 :  failOrSuccess = 1;
+    isUser ? (userOrClass = 0) : (userOrClass = 1);
+    this.failOrSuccessOption == this.failOrSuccessOptions[0]
+      ? (failOrSuccess = 0)
+      : (failOrSuccess = 1);
 
     this.difficultyOptionsReal.forEach((option) => {
       const observable = this.apiConsumer.getMostFailsOrSuccessByClassOrUser(
@@ -360,17 +492,16 @@ export class GameReportsComponent implements OnInit {
       );
       this.observables.push(observable);
     });
-    
+
     this.joinReportList(this.observables);
   }
 
   generateElapsedTimeByClassOrUser() {
-
     var userOrClass: any;
     var isUser = this.isUserSelected();
     var uocId = this.getUserOrClassId();
 
-    isUser ? userOrClass = 0 : userOrClass = 1;
+    isUser ? (userOrClass = 0) : (userOrClass = 1);
 
     this.difficultyOptionsReal.forEach((option) => {
       const observable = this.apiConsumer.getElapsedTimeByClassOrUser(
@@ -384,11 +515,10 @@ export class GameReportsComponent implements OnInit {
   }
 
   generateGeneralRanking() {
-
     var userOrClass: any;
     var isUser = this.isUserSelected();
     var uocId = this.getUserOrClassId();
-    isUser ? userOrClass = 0 : userOrClass = 1;
+    isUser ? (userOrClass = 0) : (userOrClass = 1);
 
     this.difficultyOptionsReal.forEach((option) => {
       const observable = this.apiConsumer.GeneralRanking(
@@ -402,86 +532,68 @@ export class GameReportsComponent implements OnInit {
     this.joinReportList(this.observables);
   }
 
-  //X and Y Axis
-  changeXYAxis() {
-    if (this.sReportOption == this.reportOptions[0]) {
-      if (this.filterOption[0] == this.reportByOption) {
-        this.xAxisLabel = 'Estudiantes';
-        this.legendTitle = 'Estudiantes';
-        this.yAxisLabel = 'Ratio Aciertos y Fallos';
-        if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-          this.yAxisLabel = 'Estudiantes';
-          this.xAxisLabel = 'Ratio Aciertos y Fallos';
-        }
-      } else if (this.filterOption[0] != this.reportByOption) {
-        this.xAxisLabel = 'Estudiantes';
-        this.legendTitle = 'Clases';
-        this.yAxisLabel = 'Ratio Aciertos y Fallos';
-        if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-          this.yAxisLabel = 'Estudiantes';
-          this.xAxisLabel = 'Ratio Aciertos y Fallos';
-        }
-      }
-    }
-    if (this.sReportOption == this.reportOptions[1]) {
-      if (this.filterOption[0] == this.reportByOption) {
-        this.xAxisLabel = 'Estudiantes';
-        this.legendTitle = 'Estudiantes';
-        this.yAxisLabel = 'Indice de ' + this.failOrSuccessOption;
-        if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-          this.yAxisLabel = 'Estudiantes';
-          this.xAxisLabel = 'Indice de ' + this.failOrSuccessOption;
-        }
-      } else if (this.filterOption[0] != this.reportByOption) {
-        this.xAxisLabel = 'Estudiantes';
-        this.legendTitle = 'Clases';
-        this.yAxisLabel = 'Indice de ' + this.failOrSuccessOption;
-        if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-          this.yAxisLabel = 'Estudiantes';
-          this.xAxisLabel = 'Indice de ' + this.failOrSuccessOption;
-        }
-      }
-    }
-    if (this.sReportOption == this.reportOptions[2]) {
-      if (this.filterOption[0] == this.reportByOption) {
-        this.xAxisLabel = 'Estudiantes';
-        this.legendTitle = 'Estudiantes';
-        this.yAxisLabel = 'Tiempo Empleado';
-        if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-          this.yAxisLabel = 'Estudiantes';
-          this.xAxisLabel = 'Tiempo Empleado';
-        }
-      } else if (this.filterOption[0] != this.reportByOption) {
-        this.xAxisLabel = 'Estudiantes';
-        this.legendTitle = 'Clases';
-        this.yAxisLabel = 'Tiempo Empleado';
-        if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-          this.yAxisLabel = 'Estudiantes';
-          this.xAxisLabel = 'Tiempo Empleado';
-        }
-      }
-    }
-    if (this.sReportOption == this.reportOptions[3]) {
-      if (this.filterOption[0] == this.reportByOption) {
-        this.xAxisLabel = 'Estudiantes';
-        this.legendTitle = 'Estudiantes';
-        this.yAxisLabel = 'Ranking General';
-        if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-          this.yAxisLabel = 'Estudiantes';
-          this.xAxisLabel = 'Ranking General';
-        }
-      } else if (this.filterOption[0] != this.reportByOption) {
-        this.xAxisLabel = 'Estudiantes';
-        this.legendTitle = 'Clases';
-        this.yAxisLabel = 'Ranking General';
-        if (this.selectedTypeOfChart == this.typeOfChartOption[1]) {
-          this.yAxisLabel = 'Estudiantes';
-          this.xAxisLabel = 'Ranking General';
-        }
-      }
-    }
+  // Add the observables responses to the sfrOtherCharts
+  joinReportListOtherCharts(
+    observables: Observable<ChartsInterface>[]
+  ): Observable<ChartsInterface[]> {
+    return forkJoin(observables).pipe(
+      tap((results: ChartsInterface[]) => {
+        results[4].value = parseFloat((results[4].value / 3600).toFixed(2));
+        this.sfrOtherCharts = results;
+      }),
+      catchError((error) => {
+        console.error('Error fetching sfrOtherCharts:', error);
+        this.sfrOtherCharts = [];
+        return of([]);
+      })
+    );
+  }
+  //--
+  joinReportListFoS(
+    observables: Observable<ChartsInterface>[],
+    fos: number
+  ): Observable<ChartsInterface[]> {
+    return forkJoin(observables).pipe(
+      tap((results: ChartsInterface[]) => {
+        fos == 1 ? (this.sfrFails = results) : (this.sfrSuccess = results);
+      }),
+      catchError((error) => {
+        console.error('Error fetching sfrOtherCharts:', error);
+        fos == 1 ? (this.sfrFails = []) : (this.sfrSuccess = []);
+        return of([]);
+      })
+    );
   }
 
+  joinReportListGameCount(
+    observables: Observable<ChartsInterface>[]
+  ): Observable<ChartsInterface[]> {
+    return forkJoin(observables).pipe(
+      tap((results: ChartsInterface[]) => {
+        this.sfrGameCount = results;
+      }),
+      catchError((error) => {
+        console.error('Error fetching sfrGameCount:', error);
+        this.sfrGameCount = [];
+        return of([]);
+      })
+    );
+  }
+
+  joinReportListGameScore(
+    observables: Observable<ChartsInterface>[]
+  ): Observable<ChartsInterface[]> {
+    return forkJoin(observables).pipe(
+      tap((results: ChartsInterface[]) => {
+        this.sfrGameScore = results;
+      }),
+      catchError((error) => {
+        console.error('Error fetching sfrGameScore:', error);
+        this.sfrGameScore = [];
+        return of([]);
+      })
+    );
+  }
 
   // Add the observables responses to the SFR
   joinReportList(observables: Observable<BarChartsInterface>[]) {
@@ -497,15 +609,14 @@ export class GameReportsComponent implements OnInit {
   }
 
   // Validate if the option is user or class and return the ID
-  getUserOrClassId() : number {
-
+  getUserOrClassId(): number {
     var uocId = 0;
     if (
       this.selectedUser &&
       this.selectedUser.id !== undefined &&
-      this.selectedUser.id !== null 
+      this.selectedUser.id !== null
     ) {
-      uocId = this.selectedUser.id
+      uocId = this.selectedUser.id;
     }
     if (
       this.selectedClass &&
@@ -518,14 +629,13 @@ export class GameReportsComponent implements OnInit {
     return uocId;
   }
 
-  isUserSelected() : boolean {
-
+  isUserSelected(): boolean {
     var isUoC: any;
 
     if (
       this.selectedUser &&
       this.selectedUser.id !== undefined &&
-      this.selectedUser.id !== null 
+      this.selectedUser.id !== null
     ) {
       isUoC = true;
     }
@@ -539,4 +649,9 @@ export class GameReportsComponent implements OnInit {
     return isUoC;
   }
 
+  //Visibility functions
+  changeVerticalAndHorizontalBarsVisibility(vv: boolean) {
+    this.vvBarVertical2d = vv;
+    this.vvBarHorizontalStacked = vv;
+  }
 }

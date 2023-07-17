@@ -22,6 +22,8 @@ import { UserManagementComponent } from './user-management/user-management.compo
 import { RestorePasswordComponent } from './restore-password/restore-password.component';
 import { GameReportsComponent } from './game-reports/game-reports.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import {MatCardModule} from '@angular/material/card';
+
 
 
 @NgModule({
@@ -47,6 +49,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     MatSelectModule,
     MatTableModule,
     NgxChartsModule,
+    MatCardModule,
     ToastrModule.forRoot(),
   ],
   providers: [],

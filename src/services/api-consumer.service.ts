@@ -36,6 +36,63 @@ export class ApiConsumerService {
     return headers;
   }
 
+  //-- General info
+  getGeneralInfo(): Observable<any>{
+    return this.http
+      .get<SFRResponse>(this.globalUrl + '/get-GenerateGeneralInfo/' +encodeURIComponent(this.tokenService.getUid()), {
+        headers: this.getHeaders(),
+      })
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error get-GenerateGeneralInfo:', error);
+          return of([]);
+        })
+      );
+  }
+  getTeacherStudentsFailOrSuccessCount(failOrSuccess: number): Observable<any>{
+    return this.http
+      .get<SFRResponse>(this.globalUrl + '/get-GetTeacherStudentsFailOrSuccessCount/' +encodeURIComponent(this.tokenService.getUid()) +'/' +encodeURIComponent(failOrSuccess), {
+        headers: this.getHeaders(),
+      })
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error get-GetTeacherStudentsFailOrSuccessCount:', error);
+          return of([]);
+        })
+      );
+  }
+
+  getTeacherStudentsGamesPlayedCount(): Observable<any>{
+    return this.http
+      .get<SFRResponse>(this.globalUrl + '/get-GetTeacherStudentsGamesPlayedCount/' +encodeURIComponent(this.tokenService.getUid()), {
+        headers: this.getHeaders(),
+      })
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error get-GetTeacherStudentsGamesPlayedCount:', error);
+          return of([]);
+        })
+      );
+  }
+
+  GetTeacherStudentsGamesScores(): Observable<any>{
+    return this.http
+      .get<SFRResponse>(this.globalUrl + '/get-GetTeacherStudentsGamesScores/' +encodeURIComponent(this.tokenService.getUid()), {
+        headers: this.getHeaders(),
+      })
+      .pipe(
+        map((response: SFRResponse) => response.data),
+        catchError((error) => {
+          console.error('Error get-GetTeacherStudentsGamesScores:', error);
+          return of([]);
+        })
+      );
+  }
+
+
   //-- Games
   fetchAllGames(): Observable<any>{
     return this.http
