@@ -6,12 +6,13 @@
 
 .bbox {
   flex-grow: 1; /* Allow .bbox to grow and occupy available vertical space */
-  background-color: #e9eaec;
+  background-color: #fafafa;
   border-radius: 25px;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2%;
+  max-height: 100%;
 }
 
 .reports-cont {
@@ -26,6 +27,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  max-height: 100%;
 }
 .item-cont {
   width: 100%;
@@ -47,7 +49,7 @@
   width: 100%;
 }
 .select-conf:focus {
-  outline: 1px #fe5115 solid;
+  outline: 1px #00bff3 solid;
 }
 #role-select {
   width: 100%;
@@ -55,17 +57,24 @@
 
 .graphic-cont {
   width: 80%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  justify-content: center;
   align-items: center;
   padding: 3%;
+  overflow-y: auto; /* Enable vertical scroll */
+  max-height: 99%; /* Set a maximum height for the container */
 }
+
+#g0{
+}
+.general-graph{
+  width: 100%;
+  max-width: 100%;
+  height: 50%;
+}
+
 .graph {
   width: 100%;
   height: 100%;
+  margin-bottom: 20px; /* Add some spacing between the graphs */
 }
 
 
@@ -106,21 +115,21 @@
   border-radius: 25px;
 }
 #search-box-fr:focus {
-  outline: 1px #fe5115 solid;
+  outline: 1px #00bff3 solid;
 }
 .btn {
   width: 100%;
-  color: #fe5115;
+  color: #00bff3;
   background-color: transparent;
   border-style: dashed;
   border-width: 3px;
-  border-color: #fe5115;
+  border-color: #00bff3;
   border-radius: 15px;
   margin-top: 5%;
 }
 .btn:hover {
   color: white;
-  background-color: #fe5115;
+  background-color: #00bff3;
   border-radius: 25px;
 }
 
@@ -132,4 +141,12 @@
 #lbl-information{
   margin-top: 2%;
   width: 100%;
+}
+
+.lbl-charts-info{
+  margin-bottom: 2%;
+}
+
+#g0-piecharts-fs{
+  
 }

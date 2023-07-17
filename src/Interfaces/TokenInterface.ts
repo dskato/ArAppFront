@@ -7,4 +7,5 @@ export interface TokenInterface {
   iat: number;
   iss: string;
   aud: string;
+  uid:string;
 }

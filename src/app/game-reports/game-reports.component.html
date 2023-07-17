@@ -37,6 +37,7 @@
             id="game-select"
             [(ngModel)]="gameOption"
           >
+            <option value="" disabled selected>Select a game</option>
             <option *ngFor="let gameItem of gamesOptions" [ngValue]="gameItem">
               {{ gameItem.gameName + " - " + gameItem.model }}
             </option>
@@ -56,21 +57,6 @@
             </option>
           </select>
         </div>
-
-        <label for="difficulty" class="lbl-conf">Dificultad:</label>
-        <select
-          class="select-conf"
-          name="difficulty-select"
-          id="difficulty-select"
-          [(ngModel)]="difficultyOption"
-        >
-          <option
-            *ngFor="let difficulty of difficultyOptions"
-            [value]="difficulty"
-          >
-            {{ difficulty }}
-          </option>
-        </select>
 
         <div class="class-opt-cont" *ngIf="vvIsFilterByClass">
           <label for="search-box-fr" class="lbl-conf">Buscar clase</label>
@@ -123,21 +109,6 @@
           </select>
         </div>
 
-        <label for="type-of-chart" class="lbl-conf" id="lbl-typechart"
-          >Tipo de Grafico:</label
-        >
-        <select
-          class="select-conf"
-          name="type-of-chart"
-          id="type-of-chart"
-          [(ngModel)]="selectedTypeOfChart"
-          (click)="changeChart()"
-        >
-          <option *ngFor="let chart of typeOfChartOption" [ngValue]="chart">
-            {{ chart }}
-          </option>
-        </select>
-
         <button
           (click)="generateReportBarCharts()"
           type="button"
@@ -146,13 +117,101 @@
         >
           Generar Reporte
         </button>
-        <p class="lbl-conf" id="lbl-information" *ngIf="vvButtonGenerateReport" [innerHTML]="reportInformation">
+        <button
+          (click)="showGeneralReport()"
+          type="button"
+          class="btn"
+          *ngIf="vvButtonShowGeneralInfo"
+        >
+          Ver reporte general
+        </button>
+        <p
+          class="lbl-conf"
+          id="lbl-information"
+          *ngIf="vvButtonGenerateReport"
+          [innerHTML]="reportInformation"
+        >
           {{ reportInformation }}
         </p>
       </div>
     </div>
 
     <div class="graphic-cont" id="graphic-cont">
+      <p class="lbl-charts-info" *ngIf="vvGeneralCharts">Informacion General</p>
+      <div class="general-graph" id="g0" *ngIf="vvGeneralCharts">
+        <ngx-charts-number-card
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfrOtherCharts"
+          [cardColor]="cardColor"
+          (select)="onSelect($event)"
+          (activate)="onActivate($event)"
+          (deactivate)="onDeactivate($event)"
+        >
+        </ngx-charts-number-card>
+      </div>
+
+      <p class="lbl-charts-info" *ngIf="vvGeneralCharts">
+        Numero de veces jugadas de sus estudiantes
+      </p>
+      <div class="general-graph" id="g0-piecharts-fs" *ngIf="vvGeneralCharts">
+        <ngx-charts-pie-chart
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfrGameCount"
+          [gradient]="gradient"
+          [legend]="showLegend"
+          [labels]="true"
+          [doughnut]="true"
+          (select)="onSelect($event)"
+          (activate)="onActivate($event)"
+          (deactivate)="onDeactivate($event)"
+        >
+        </ngx-charts-pie-chart>
+      </div>
+
+      <p class="lbl-charts-info" *ngIf="vvGeneralCharts">
+        Puntaje general de sus estudiantes
+      </p>
+      <div class="general-graph" id="g0-piecharts-fs" *ngIf="vvGeneralCharts">
+        <ngx-charts-pie-grid
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfrGameScore"
+          (select)="onSelect($event)"
+        >
+        </ngx-charts-pie-grid>
+      </div>
+
+      <p class="lbl-charts-info" *ngIf="vvGeneralCharts">
+        Aciertos y Fallos totales de sus estudiantes
+      </p>
+      <div class="general-graph" id="g0-piecharts-fs" *ngIf="vvGeneralCharts">
+        <ngx-charts-advanced-pie-chart
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfrSuccess"
+          [gradient]="gradient"
+          (select)="onSelect($event)"
+          (activate)="onActivate($event)"
+          (deactivate)="onDeactivate($event)"
+        >
+        </ngx-charts-advanced-pie-chart>
+        <ngx-charts-advanced-pie-chart
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfrFails"
+          [gradient]="gradient"
+          (select)="onSelect($event)"
+          (activate)="onActivate($event)"
+          (deactivate)="onDeactivate($event)"
+        >
+        </ngx-charts-advanced-pie-chart>
+      </div>
+
+      <p class="lbl-charts-info" *ngIf="vvBarVertical2d">
+        Barras verticales agrupadas
+      </p>
       <div class="graph" id="g1" *ngIf="vvBarVertical2d">
         <ngx-charts-bar-vertical-2d
           [view]="view"
@@ -173,6 +232,50 @@
         >
         </ngx-charts-bar-vertical-2d>
       </div>
+
+      <p class="lbl-charts-info" *ngIf="vvBarVertical2d">
+        Barras verticales normalizadas
+      </p>
+      <div class="graph" id="g1-n" *ngIf="vvBarVertical2d">
+        <ngx-charts-bar-vertical-normalized
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfr"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          (select)="onSelect($event)"
+        >
+        </ngx-charts-bar-vertical-normalized>
+      </div>
+
+      <p class="lbl-charts-info" *ngIf="vvBarVertical2d">Mapa de calor</p>
+      <div class="graph" id="g1-heatmap" *ngIf="vvBarVertical2d">
+        <ngx-charts-heat-map
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="sfr"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          (select)="onSelect($event)"
+        >
+        </ngx-charts-heat-map>
+      </div>
+
+      <p class="lbl-charts-info" *ngIf="vvBarVertical2d">
+        Barras horizontales apiladas
+      </p>
       <div class="graph" id="g2" *ngIf="vvBarHorizontalStacked">
         <ngx-charts-bar-horizontal-stacked
           [view]="view"
@@ -209,6 +312,7 @@
         >
         </ngx-charts-area-chart>
       </div>
+
       <div class="graph" id="g4" *ngIf="vvBarLines">
         <ngx-charts-line-chart
           [view]="view"
