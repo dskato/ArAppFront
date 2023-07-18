@@ -1,6 +1,16 @@
 import { Component, OnInit, ElementRef, Renderer2 } from '@angular/core';
 import { Color, ScaleType } from '@swimlane/ngx-charts';
-import { Observable, catchError, forkJoin, of, switchMap, tap } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  finalize,
+  forkJoin,
+  map,
+  of,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 //-- Interfaces
 import { ClassItem } from 'src/Interfaces/ClassItem';
@@ -55,6 +65,7 @@ export class GameReportsComponent implements OnInit {
   vvButtonShowGeneralInfo = false;
 
   //charts visibility variables
+  vvGeneralChartsMain = true;
   vvGeneralCharts = true;
   vvBarVertical2d = true;
   vvBarHorizontalStacked = true;
@@ -129,7 +140,6 @@ export class GameReportsComponent implements OnInit {
     this.generateGeneralInfo().subscribe(() => {});
     this.generateGameCounts().subscribe(() => {});
     this.generateGameScores().subscribe(() => {});
-
     this.generateTSFoS(1).subscribe(() => {});
     this.generateTSFoS(0).subscribe(() => {});
   }
@@ -302,12 +312,23 @@ export class GameReportsComponent implements OnInit {
 
   showGeneralReport() {
     this.vvButtonShowGeneralInfo = false;
-    this.vvGeneralCharts = true;
+    this.vvGeneralChartsMain = true;
+    if (
+      this.sfrFails.length == 0 &&
+      this.sfrSuccess.length == 0 &&
+      this.sfrGameCount.length == 0 &&
+      this.sfrGameScore.length == 0
+    ) {
+      this.vvGeneralCharts = false;
+    } else {
+      this.vvGeneralCharts = true;
+    }
     this.changeVerticalAndHorizontalBarsVisibility(false);
   }
   generateReportBarCharts() {
     this.vvButtonShowGeneralInfo = true;
     this.vvGeneralCharts = false;
+    this.vvGeneralChartsMain = false;
     this.changeVerticalAndHorizontalBarsVisibility(true);
 
     this.sfr = [];

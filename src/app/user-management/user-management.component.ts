@@ -52,7 +52,7 @@ export class UserManagementComponent implements OnInit {
 
   fetchUsers(): void {
     this.http
-      .get<UserListResponse>(this.globalUrl + '/get-getallusers', {
+      .get<UserListResponse>(this.globalUrl + '/get-getallusers/' + encodeURIComponent(this.tokenService.getUid()), {
         headers: this.apiConsumer.getHeaders()
       })
       .subscribe(
