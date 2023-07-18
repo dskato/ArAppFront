@@ -5,8 +5,8 @@ import { Injectable } from '@angular/core';
 })
 export class ApiHandlerService {
   
-  public apiUrl: string = 'https://arappbackend.onrender.com';
-  //public apiUrl: string = 'https://localhost:7016';
+  //public apiUrl: string = 'https://arappbackend.onrender.com';
+  public apiUrl: string = 'https://localhost:7016';
   
   
 }
