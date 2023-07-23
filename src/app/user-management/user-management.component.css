@@ -16,10 +16,50 @@
   max-height: 100%; /* Set a maximum height for the container */
 }
 
+.user-filtersearch{
+  display: flex;
+  flex-direction: row;
+  margin-top: 2%;
+  justify-content: space-between;
+  width: 90%;
+  align-items: center;
+  
+}
+.srch-container{
+  width: 40%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 60%;
+  margin-right: 2%;
+}
+
+.item-inptt{
+  width: 95%;
+  height: 100%;
+  font-size: 11px;
+  text-align: center;
+  border: none;
+  outline: none;
+  background-color: white;
+  outline: 1px #818181 solid;
+  border-radius: 10px;
+}
+#search-icon{
+}
+#search-box-fr.active {
+  outline: 1px #1c1c1c solid;
+  border-radius: 25px;
+}
+#search-box-fr:focus {
+  outline: 1px #00bff3 solid;
+}
+
+
 h2 {
   text-align: left;
   width: 90%;
-  margin-top: 2%;
 }
 
 .separator {

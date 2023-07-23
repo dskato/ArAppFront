@@ -1,5 +1,21 @@
 <div class="bbox">
-  <h2>Gestion de Usuarios</h2>
+  <div class="user-filtersearch">
+    <h2>Gestion de Usuarios</h2>
+    <div class="srch-container">
+      <input
+        class="item-inptt"
+        type="text"
+        [(ngModel)]="searchTextUser"
+        id="search-box-fr"
+        name="search-box-fr"
+        placeholder="Buscar usuario"
+        (input)="onSearchUserChange()"
+      />
+      <i class="bi bi-search" id="search-icon"></i>
+
+    </div>
+  </div>
+
   <div class="separator"></div>
   <div class="title-bar">
     <label>Nombre</label>
@@ -36,7 +52,9 @@
           id="status-inpt"
           type="text"
           [value]="user.status"
-          [ngStyle]="{ 'background-color': getStatusBackgroundColor(user.status) }"
+          [ngStyle]="{
+            'background-color': getStatusBackgroundColor(user.status)
+          }"
           readonly
         />
         <input class="item-inpt" type="text" [value]="user.email" readonly />
@@ -64,7 +82,11 @@
             [ngClass]="{ active: user.editMode }"
             class="bi bi-pencil-square"
           ></i>
-          <i [ngStyle]="{ 'color': getIconStatusBackgroundColor(user.status) }" (click)="changeUserStatus(user)" class="bi bi-person-badge-fill"></i>
+          <i
+            [ngStyle]="{ color: getIconStatusBackgroundColor(user.status) }"
+            (click)="changeUserStatus(user)"
+            class="bi bi-person-badge-fill"
+          ></i>
           <i
             (click)="editUser(user)"
             class="bi bi-check-circle-fill"
