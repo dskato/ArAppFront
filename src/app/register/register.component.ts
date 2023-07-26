@@ -63,7 +63,7 @@ export class RegisterComponent implements OnInit {
       !this.password ||
       !this.role
     ) {
-      this.toastr.error('Please fill out all required fields.');
+      this.toastr.error('Porfavor llenar los campos requeridos.');
       return;
     }
 
@@ -78,11 +78,11 @@ export class RegisterComponent implements OnInit {
       this.age.toString()
     ).subscribe(
       (response) => {
-        this.toastr.success('User created successfully.');
+        this.toastr.success('Docente creado!.');
         this.router.navigate(['/login']);
       },
       (error) => {
-        this.toastr.error('Failed to create user.');
+        this.toastr.error('Ocurrio un error al crear el usuario.');
         console.log('ERROR -> ' + error);
       }
     );

@@ -42,8 +42,10 @@ export class UserManagementComponent implements OnInit {
     private tokenService: TokenService
   ) {}
 
+  searchTextUser!: string;
   globalUrl = this.apiHandler.apiUrl;
   users: UserData[] = [];
+  originalUsers: UserData[] = []; // Store the original users array
   token!: TokenInterface;
 
   ngOnInit(): void {
@@ -61,6 +63,7 @@ export class UserManagementComponent implements OnInit {
             ...user,
             editMode: false, // Add the "editMode" property with a default value of false
           }));
+          this.originalUsers = [...this.users];
           console.log(this.users);
         },
         (error) => {
@@ -158,5 +161,18 @@ export class UserManagementComponent implements OnInit {
           this.toastr.error('Error actualizando usuario.');
         }
       );
+  }
+
+  onSearchUserChange(): void {
+    if (this.searchTextUser) {
+      // If the search text is not empty, filter the users array based on the search text
+      this.users = this.users.filter(user =>
+        user.firstname.toLowerCase().includes(this.searchTextUser.toLowerCase()) ||
+        user.lastname.toLowerCase().includes(this.searchTextUser.toLowerCase())
+      );
+    } else {
+      // If the search text is empty, revert back to the original list of users
+      this.users = [...this.originalUsers];
+    }
   }
 }
